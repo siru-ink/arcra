@@ -12,7 +12,7 @@ async fn apply_db_migrations(pool: &SqlitePool) -> Result<(), MigrateError> {
 }
 
 pub async fn init_db_connection() -> SqlitePool {
-    let connection_options = SqliteConnectOptions::from_str("sqlite:data.db")
+    let connection_options = SqliteConnectOptions::from_str("sqlite:./data/data.db")
         .expect("Compiled slite connection string should produce functioning db")
         .create_if_missing(true)
         .foreign_keys(true)
