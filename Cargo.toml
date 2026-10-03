@@ -7,9 +7,9 @@ edition = "2024"
 argon2 = "0.6.0"
 axum = "0.8.9"
 axum-util = "0.2.2"
+base64 = "0.23.1"
 serde = "1.0.229"
 sqlx = { version = "0.9.0", features = ["runtime-tokio", "sqlite"] }
 tera = { version = "2.4.0", features = ["fast", "glob_fs"] }
 tokio = { version = "1.53.1", features = ["full"] }
-tower = "0.5.3"
 tower-cookies = { version = "0.11.0", features = ["private"] }
