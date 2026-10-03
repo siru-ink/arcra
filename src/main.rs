@@ -9,7 +9,6 @@ use sqlx::SqlitePool;
 use std::sync::{Arc, OnceLock};
 use tera::Tera;
 use tokio::{main, net::TcpListener};
-use tower::ServiceBuilder;
 use tower_cookies::{CookieManagerLayer, Key};
 
 mod crumble;
@@ -39,8 +38,16 @@ async fn main() {
         .expect("Static password_hash variable should be settable");
 
     COOKIE_KEY
-        .set(Key::from(oracle.cookie_key.as_bytes()))
+        .set(Key::from(&oracle.cookie_key[..]))
         .expect("Static cookie_key variable should be settable");
+
+    #[cfg(debug_assertions)]
+    println!(
+        "{} | {} | {:?}",
+        USERNAME.get().unwrap(),
+        PASSWORD_HASH.get().unwrap(),
+        COOKIE_KEY.get().unwrap().master()
+    );
 
     let pool = db::init_db_connection().await;
 
@@ -53,13 +60,12 @@ async fn main() {
         tera: tera,
     });
 
-    let router = routing::get()
-        .layer(
-            ServiceBuilder::new()
-                .layer(from_fn(logger))
-                .layer(CookieManagerLayer::new()),
-        )
-        .with_state(appstate);
+    let router = routing::get();
+
+    #[cfg(debug_assertions)]
+    let router = router.layer(from_fn(logger));
+
+    let router = router.layer(CookieManagerLayer::new()).with_state(appstate);
 
     let listener = TcpListener::bind("0.0.0.0:80")
         .await
@@ -70,7 +76,8 @@ async fn main() {
         .expect("Server crashed unexpectedly");
 }
 
+#[cfg(debug_assertions)]
 async fn logger(request: Request, next: Next) -> Response {
-    println!("Serving {}", request.uri().to_string());
+    println!("Serving {}", request.uri());
     next.run(request).await
 }
