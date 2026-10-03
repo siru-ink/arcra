@@ -17,7 +17,11 @@
     "label": "Run dev server",
     "command": "cargo run",
     //"args": [],
-    // "env": {},
+    "env": {
+      "USERNAME": "siru",
+      "PASSWORD": "Easy2Remember?",
+      "COOKIEKEY": "uWdOOHChVrk+nNsVFVizPDJcO3WCiWGFQfLMe1sPPEXufd4sr6/EzNwcmQv+Uh/b8WYLKjxeVORRe4f/YX0KlQ=="
+    },
     "use_new_terminal": false,
     "allow_concurrent_runs": false,
     "reveal": "always",
