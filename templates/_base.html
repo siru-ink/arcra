@@ -15,9 +15,9 @@
                 <a href="/">Go home</a>
             </div>
             {% endif %}
-            {% if flash_message %}
+            {% if flash %}
             <div class="flash_box">
-                <p>{{ flash_message }}</p>
+                <p>{{ flash }}</p>
             </div>
             {% endif %}
             {% block content %}{% endblock content %}

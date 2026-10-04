@@ -24,10 +24,14 @@ impl ErrorPage {
 pub struct IndexPage {}
 
 impl IndexPage {
-    pub fn show(tera: &Tera) -> Response {
+    pub fn show(tera: &Tera, flash: Option<String>) -> Response {
         let mut context = Context::new();
 
         context.insert("pagenav", &true);
+
+        if let Some(message) = flash {
+            context.insert("flash", &message);
+        }
 
         match tera.render("index.html", &context) {
             Ok(page) => Html(page).into_response(),
