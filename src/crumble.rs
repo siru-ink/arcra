@@ -14,12 +14,14 @@ pub struct Crumble {
 
 pub enum CrumbleKind {
     Session,
+    Flash,
 }
 
 impl CrumbleKind {
     fn name(self) -> &'static str {
         match self {
             Self::Session => "session",
+            Self::Flash => "flash",
         }
     }
     fn cookie(self, data: Option<String>) -> Cookie<'static> {
@@ -28,16 +30,14 @@ impl CrumbleKind {
             None => "".to_string(),
         };
 
-        match self {
-            Self::Session => Cookie::build((self.name(), value))
-                .domain("fin.siru.ink")
-                .path("/")
-                .http_only(true)
-                .max_age(Duration::days(7))
-                .secure(true)
-                .same_site(SameSite::Strict)
-                .build(),
-        }
+        Cookie::build((self.name(), value))
+            .domain("fin.siru.ink")
+            .path("/")
+            .http_only(true)
+            .max_age(Duration::days(7))
+            .secure(true)
+            .same_site(SameSite::Strict)
+            .build()
     }
 }
 

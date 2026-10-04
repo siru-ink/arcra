@@ -14,6 +14,7 @@ use tower_cookies::{CookieManagerLayer, Key};
 mod crumble;
 mod db;
 mod env;
+mod flash;
 mod routing;
 
 struct AppState {
