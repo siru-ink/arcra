@@ -69,9 +69,15 @@ async fn main() {
 
     let router = router.layer(CookieManagerLayer::new()).with_state(appstate);
 
+    #[cfg(not(debug_assertions))]
     let listener = TcpListener::bind("0.0.0.0:80")
         .await
         .expect("Port 80 should allow binding a new listener");
+
+    #[cfg(debug_assertions)]
+    let listener = TcpListener::bind("127.0.0.1:8160")
+        .await
+        .expect("Port 8160 should allow binding a new listener");
 
     serve(listener, router)
         .await
