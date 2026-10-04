@@ -16,6 +16,7 @@ mod db;
 mod env;
 mod flash;
 mod routing;
+mod template;
 
 struct AppState {
     pool: SqlitePool,

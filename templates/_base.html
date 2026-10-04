@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}{% endblock title%}Lottom</title>
+    {% block header %}{% endblock header %}
+    {% include '_css.html' %}
+    </head>
+    <body>
+        <div class="container">
+            {% if pagenav %}
+            <div id="page_navigation">
+                <a href="/">Go home</a>
+            </div>
+            {% endif %}
+            {% if flash_message %}
+            <div class="flash_box">
+                <p>{{ flash_message }}</p>
+            </div>
+            {% endif %}
+            {% block content %}{% endblock content %}
+        </div>
+    </body>
+</html>
