@@ -16,7 +16,7 @@ impl Account {
             Account,
             "SELECT accounts.id as id,
                     accounts.name as name,
-                    currencies.descriptor as currency,
+                    currencies.name as currency,
                     accounts.balance as balance,
                     account_types.name as account_type
             FROM accounts
