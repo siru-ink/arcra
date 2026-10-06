@@ -2,15 +2,15 @@ use crate::{
     AppState,
     crumble::{Flash, Session},
     db::{Account, AccountType, Currency},
-    template::{AccountCreatePage, AccountDeletePage, AccountListPage},
+    template::{AccountCreatePage, AccountDeletePage, AccountListPage, AccountModifyPage},
 };
 use axum::{
     Form,
-    extract::State,
+    extract::{Query, State},
     response::{IntoResponse, Redirect, Response},
 };
 use serde::Deserialize;
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 pub async fn get_accounts(State(state): State<Arc<AppState>>, session: Session) -> Response {
     if !session.valid().await {
@@ -59,8 +59,31 @@ pub async fn post_delete_account() -> Response {
     todo!()
 }
 
-pub async fn get_modify_account() -> Response {
-    todo!()
+pub async fn get_modify_account(
+    State(state): State<Arc<AppState>>,
+    Query(param): Query<HashMap<String, String>>,
+    flash: Flash,
+) -> Response {
+    let account_id = match param
+        .get("account_id")
+        .and_then(|rawid| rawid.parse::<i64>().ok())
+    {
+        Some(id) => id,
+        None => {
+            flash.set("<account_id> parameter was missing from GET request. Please select one of the below accounts.".to_string());
+            return Redirect::to("/accounts/list").into_response();
+        }
+    };
+
+    let account = match Account::get(&state.pool, account_id).await {
+        Some(account) => account,
+        None => {
+            flash.set("Now account could be found with the provided id. Please select one of the accounts below.".to_string());
+            return Redirect::to("/accounts/list").into_response();
+        }
+    };
+
+    AccountModifyPage::show(&state.tera, account)
 }
 
 pub async fn post_modify_account() -> Response {
