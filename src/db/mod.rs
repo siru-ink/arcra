@@ -11,6 +11,8 @@ mod record;
 mod session;
 
 pub use account::Account;
+pub use account_types::AccountTypes;
+pub use currency::Currency;
 pub use session::Session;
 
 async fn apply_db_migrations(pool: &SqlitePool) -> Result<(), MigrateError> {
