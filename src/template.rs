@@ -121,3 +121,19 @@ impl AccountDeletePage {
         }
     }
 }
+
+pub struct AccountModifyPage {}
+
+impl AccountModifyPage {
+    pub fn show(tera: &Tera, account: Account) -> Response {
+        let mut context = Context::new();
+
+        context.insert("pagenav", &true);
+        context.insert("account", &account);
+
+        match tera.render("account_modify.html", &context) {
+            Ok(page) => Html(page).into_response(),
+            Err(_) => ErrorPage::show(tera, "Tera failed to render <account_modify.html> template"),
+        }
+    }
+}
