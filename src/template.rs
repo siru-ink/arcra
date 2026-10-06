@@ -72,11 +72,15 @@ impl LogoutPage {
 pub struct AccountListPage {}
 
 impl AccountListPage {
-    pub fn show(tera: &Tera, accounts: Vec<Account>) -> Response {
+    pub fn show(tera: &Tera, accounts: Vec<Account>, flash: Option<String>) -> Response {
         let mut context = Context::new();
 
         context.insert("pagenav", &true);
         context.insert("accounts", &accounts);
+
+        if let Some(message) = flash {
+            context.insert("flash", &message);
+        }
 
         match tera.render("account_list.html", &context) {
             Ok(page) => Html(page).into_response(),

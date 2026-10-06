@@ -12,14 +12,18 @@ use axum::{
 use serde::Deserialize;
 use std::{collections::HashMap, sync::Arc};
 
-pub async fn get_accounts(State(state): State<Arc<AppState>>, session: Session) -> Response {
+pub async fn get_accounts(
+    State(state): State<Arc<AppState>>,
+    session: Session,
+    flash: Flash,
+) -> Response {
     if !session.valid().await {
         return Redirect::to("/login").into_response();
     };
 
     let accounts = Account::list_all(&state.pool).await;
 
-    AccountListPage::show(&state.tera, accounts)
+    AccountListPage::show(&state.tera, accounts, flash.message())
 }
 
 pub async fn get_create_account(State(state): State<Arc<AppState>>, session: Session) -> Response {
