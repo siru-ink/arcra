@@ -11,6 +11,7 @@ use axum::{
 };
 use std::sync::Arc;
 
+mod accounts;
 mod auth;
 
 pub fn get() -> Router<Arc<AppState>> {
@@ -21,6 +22,15 @@ pub fn get() -> Router<Arc<AppState>> {
             routing::get(auth::get_login).post(auth::post_login),
         )
         .route("/logout", routing::get(auth::get_logout))
+        .route("/accounts/list", routing::get(accounts::get_accounts))
+        .route(
+            "/accounts/create",
+            routing::get(accounts::get_create_account).post(accounts::post_create_account),
+        )
+        .route(
+            "/accounts/delete",
+            routing::get(accounts::get_delete_account).post(accounts::post_delete_account),
+        )
 }
 
 async fn get_index(State(state): State<Arc<AppState>>, flash: Flash, session: Session) -> Response {
