@@ -2,7 +2,7 @@ use crate::{
     AppState,
     crumble::{Flash, Session},
     db::{Account, AccountType, Currency},
-    template::{AccountCreatePage, AccountListPage},
+    template::{AccountCreatePage, AccountDeletePage, AccountListPage},
 };
 use axum::{
     Form,
@@ -50,8 +50,9 @@ pub async fn post_create_account(
     Redirect::to("/").into_response()
 }
 
-pub async fn get_delete_account() -> Response {
-    todo!()
+pub async fn get_delete_account(State(state): State<Arc<AppState>>) -> Response {
+    let accounts = Account::list_all(&state.pool).await;
+    AccountDeletePage::show(&state.tera, accounts)
 }
 
 pub async fn post_delete_account() -> Response {
