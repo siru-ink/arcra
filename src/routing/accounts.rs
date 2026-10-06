@@ -1,13 +1,15 @@
 use crate::{
     AppState,
-    crumble::Session,
+    crumble::{Flash, Session},
     db::{Account, AccountType, Currency},
     template::{AccountCreatePage, AccountListPage},
 };
 use axum::{
+    Form,
     extract::State,
     response::{IntoResponse, Redirect, Response},
 };
+use serde::Deserialize;
 use std::sync::Arc;
 
 pub async fn get_accounts(State(state): State<Arc<AppState>>, session: Session) -> Response {
@@ -31,8 +33,21 @@ pub async fn get_create_account(State(state): State<Arc<AppState>>, session: Ses
     AccountCreatePage::show(&state.tera, currencies, account_types)
 }
 
-pub async fn post_create_account() -> Response {
-    todo!()
+#[derive(Deserialize)]
+pub struct AccountCreateForm {
+    name: String,
+    currency: i64,
+    account_type: i64,
+}
+
+pub async fn post_create_account(
+    State(state): State<Arc<AppState>>,
+    flash: Flash,
+    form: Form<AccountCreateForm>,
+) -> Response {
+    Account::new(&state.pool, &form.name, form.currency, form.account_type).await;
+    flash.set("New account created.".to_string());
+    Redirect::to("/").into_response()
 }
 
 pub async fn get_delete_account() -> Response {
