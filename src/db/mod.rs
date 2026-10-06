@@ -4,9 +4,11 @@ use sqlx::{
 };
 use std::{path::Path, str::FromStr, time::Duration};
 
+mod account;
 mod record;
 mod session;
 
+pub use account::Account;
 pub use session::Session;
 
 async fn apply_db_migrations(pool: &SqlitePool) -> Result<(), MigrateError> {
