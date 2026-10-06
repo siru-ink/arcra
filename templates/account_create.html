@@ -10,7 +10,7 @@
     <br>
     <label for="currency">Currency:</label>
     <select name="currency" id="currency" required >
-        <option disabled >--Please select--</option>
+        <option selected disabled value="" >--Please select--</option>
         {% for currency in currencies %}
         <option value="{{ currency.id }}">{{ currency.name }}</option>
         {% endfor %}
@@ -18,10 +18,12 @@
     <br>
     <label for="account_type">Account Type:</label>
     <select name="account_type" id="account_type" required >
-        <option disabled >--Please select--</option>
+        <option selected disabled value="" >--Please select--</option>
         {% for account_type in account_types %}
         <option value="{{ account_type.id }}">{{ account_type.name }}</option>
         {% endfor %}
     </select>
+    <br>
+    <button type="submit">Create</button>
 </form>
 {% endblock content %}
