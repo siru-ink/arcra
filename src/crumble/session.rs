@@ -32,6 +32,11 @@ impl Session {
         self.crumble
             .set(CrumbleKind::Session, session.id().to_string());
     }
+
+    pub async fn remove(&self) {
+        db::Session::vacuum(&self.pool).await;
+        self.crumble.del(CrumbleKind::Session);
+    }
 }
 
 impl FromRequestParts<Arc<AppState>> for Session {
