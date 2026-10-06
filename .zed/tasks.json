@@ -48,8 +48,8 @@
     "save": "all",
   },
   {
-    "label": "Reset db & Prepare query metadata",
-    "command": "rm -f ./data/data.db && cargo sqlx database create && cargo sqlx migrate run && cargo sqlx prepare",
+    "label": "Remigrate database",
+    "command": "rm -f ./data/data.db && cargo sqlx database create && cargo sqlx migrate run",
     //"args": [],
     "env": { "DATABASE_URL": "sqlite:./data/data.db" },
     "use_new_terminal": false,
