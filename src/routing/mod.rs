@@ -31,6 +31,10 @@ pub fn get() -> Router<Arc<AppState>> {
             "/accounts/delete",
             routing::get(accounts::get_delete_account).post(accounts::post_delete_account),
         )
+        .route(
+            "/accounts/modify",
+            routing::get(accounts::get_modify_account).post(accounts::post_modify_account),
+        )
 }
 
 async fn get_index(State(state): State<Arc<AppState>>, flash: Flash, session: Session) -> Response {

@@ -57,3 +57,11 @@ pub async fn get_delete_account() -> Response {
 pub async fn post_delete_account() -> Response {
     todo!()
 }
+
+pub async fn get_modify_account() -> Response {
+    todo!()
+}
+
+pub async fn post_modify_account() -> Response {
+    todo!()
+}
