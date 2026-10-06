@@ -5,11 +5,11 @@ CREATE TABLE account_types (
 );
 
 INSERT INTO account_types (name, balance_type) VALUES
-(asset, debit),
-(expense, debit),
-(liability, credit),
-(equity, credit),
-(revenue, credit);
+('asset', 'debit'),
+('expense', 'debit'),
+('liability', 'credit'),
+('equity', 'credit'),
+('revenue', 'credit');
 
 CREATE TABLE currencies (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
