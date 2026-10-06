@@ -1,5 +1,5 @@
 use serde::Serialize;
-use sqlx::{SqlitePool, query_as};
+use sqlx::{SqlitePool, query, query_as};
 
 #[derive(Serialize)]
 pub struct Account {
@@ -31,6 +31,21 @@ impl Account {
                 eprintln!("Failed to access accounts in database: {}", e);
                 return vec![];
             }
+        }
+    }
+
+    pub async fn new(pool: &SqlitePool, name: &str, currency: i64, account_type: i64) {
+        if let Err(e) = query!(
+            "INSERT INTO accounts (name, currency, balance, account_type) VALUES (?,?,0,?)",
+            name,
+            currency,
+            account_type
+        )
+        .execute(pool)
+        .await
+        {
+            #[cfg(debug_assertions)]
+            eprintln!("Could not create new account: {}", e);
         }
     }
 }
