@@ -13,6 +13,7 @@ use std::sync::Arc;
 
 mod accounts;
 mod auth;
+mod currencies;
 
 pub fn get() -> Router<Arc<AppState>> {
     Router::new()
@@ -34,6 +35,15 @@ pub fn get() -> Router<Arc<AppState>> {
         .route(
             "/accounts/modify",
             routing::get(accounts::get_modify_account).post(accounts::post_modify_account),
+        )
+        .route("/currencies/list", routing::get(currencies::get_currencies))
+        .route(
+            "/currencies/create",
+            routing::get(currencies::get_create_currency).post(currencies::post_create_currency),
+        )
+        .route(
+            "/currencies/delete",
+            routing::get(currencies::get_delete_currency).post(currencies::post_delete_currency),
         )
 }
 
