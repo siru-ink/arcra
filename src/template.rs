@@ -39,3 +39,20 @@ impl IndexPage {
         }
     }
 }
+
+pub struct LoginPage {}
+
+impl LoginPage {
+    pub fn show(tera: &Tera, flash: Option<String>) -> Response {
+        let mut context = Context::new();
+
+        if let Some(message) = flash {
+            context.insert("flash", &message)
+        };
+
+        match tera.render("login.html", &context) {
+            Ok(page) => Html(page).into_response(),
+            Err(_) => ErrorPage::show(tera, "Tera failed to render <login.html> template"),
+        }
+    }
+}
