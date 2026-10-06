@@ -1,9 +1,9 @@
+use crate::db::Account;
 use axum::{
     http::StatusCode,
     response::{Html, IntoResponse, Response},
 };
 use tera::{Context, Tera};
-
 pub struct ErrorPage {}
 
 impl ErrorPage {
@@ -65,6 +65,22 @@ impl LogoutPage {
         match tera.render("logout.html", &context) {
             Ok(page) => Html(page).into_response(),
             Err(_) => ErrorPage::show(tera, "Tera failed to render <logout.html> template"),
+        }
+    }
+}
+
+pub struct AccountListPage {}
+
+impl AccountListPage {
+    pub fn show(tera: &Tera, accounts: Vec<Account>) -> Response {
+        let mut context = Context::new();
+
+        context.insert("pagenav", &true);
+        context.insert("accounts", &accounts);
+
+        match tera.render("account_list.html", &context) {
+            Ok(page) => Html(page).into_response(),
+            Err(_) => ErrorPage::show(tera, "Tera failed to render <account_list.html> template"),
         }
     }
 }

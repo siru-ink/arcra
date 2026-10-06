@@ -1,0 +1,12 @@
+{% extends '_base.html' %}
+
+{% block title %}Accounts List | {% endblock title %}
+
+{% block content %}
+<h2>Accounts List</h2>
+<ul>
+    {% for account in accounts %}
+    <li>{{ account.name }} - {{ account.account_type }} - {{ account.balance }} - {{ account.currency }}</li>
+    {% endfor %}
+</ul>
+{% endblock content %}
