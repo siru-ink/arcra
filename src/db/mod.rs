@@ -5,6 +5,9 @@ use sqlx::{
 use std::{path::Path, str::FromStr, time::Duration};
 
 mod record;
+mod session;
+
+pub use session::Session;
 
 async fn apply_db_migrations(pool: &SqlitePool) -> Result<(), MigrateError> {
     let migrator = Migrator::new(Path::new("./migrations")).await?;

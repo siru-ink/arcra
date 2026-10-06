@@ -38,3 +38,8 @@ CREATE TABLE records (
     amount INTEGER NOT NULL,
     currency INTEGER REFERENCES currencies(id) ON DELETE RESTRICT
 );
+
+CREATE TABLE sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    valid_until TEXT NOT NULL
+);
