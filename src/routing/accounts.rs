@@ -90,6 +90,24 @@ pub async fn get_modify_account(
     AccountModifyPage::show(&state.tera, account)
 }
 
-pub async fn post_modify_account() -> Response {
-    todo!()
+#[derive(Deserialize)]
+pub struct AccountModifyForm {
+    account_id: i64,
+    name: String,
+}
+
+pub async fn post_modify_account(
+    State(state): State<Arc<AppState>>,
+    flash: Flash,
+    form: Form<AccountModifyForm>,
+) -> Response {
+    let account = match Account::get(&state.pool, form.account_id).await {
+        Some(account) => account,
+        None => return Redirect::to("/accounts/list").into_response(),
+    };
+
+    account.rename(&state.pool, &form.name).await;
+
+    flash.set("Account renamed successfully.".to_string());
+    Redirect::to("/accounts/list").into_response()
 }
