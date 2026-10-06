@@ -56,3 +56,15 @@ impl LoginPage {
         }
     }
 }
+
+pub struct LogoutPage {}
+
+impl LogoutPage {
+    pub fn show(tera: &Tera) -> Response {
+        let context = Context::new();
+        match tera.render("logout.html", &context) {
+            Ok(page) => Html(page).into_response(),
+            Err(_) => ErrorPage::show(tera, "Tera failed to render <logout.html> template"),
+        }
+    }
+}
