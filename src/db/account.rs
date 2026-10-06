@@ -1,5 +1,5 @@
 use serde::Serialize;
-use sqlx::{SqlitePool, query, query_as};
+use sqlx::{QueryBuilder, SqlitePool, query, query_as};
 
 #[derive(Serialize)]
 pub struct Account {
@@ -78,5 +78,16 @@ impl Account {
             .execute(pool)
             .await;
         }
+    }
+
+    pub async fn drop_all(pool: &SqlitePool, ids: &Vec<i64>) {
+        let mut sql_builder = QueryBuilder::new("DELETE FROM accounts WHERE id IN (");
+        let mut separator = sql_builder.separated(", ");
+        for id in ids {
+            separator.push_bind(id);
+        }
+        separator.push_unseparated(")");
+
+        let _ = sql_builder.build().execute(pool).await;
     }
 }
