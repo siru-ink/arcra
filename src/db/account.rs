@@ -48,4 +48,23 @@ impl Account {
             eprintln!("Could not create new account: {}", e);
         }
     }
+
+    pub async fn get(pool: &SqlitePool, id: i64) -> Option<Account> {
+        query_as!(
+            Account,
+            "SELECT accounts.id as id,
+                    accounts.name as name,
+                    currencies.name as currency,
+                    accounts.balance as balance,
+                    account_types.name as account_type
+             FROM accounts
+             JOIN currencies on accounts.currency = currencies.id
+             JOIN account_types on accounts.account_type = account_types.id
+             WHERE accounts.id = ?",
+            id
+        )
+        .fetch_optional(pool)
+        .await
+        .ok()?
+    }
 }
