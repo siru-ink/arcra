@@ -8,6 +8,12 @@ use tower_cookies::{
     cookie::{SameSite, time::Duration},
 };
 
+mod flash;
+mod session;
+
+pub use flash::Flash;
+pub use session::Session;
+
 pub struct Crumble {
     jar: Cookies,
 }
