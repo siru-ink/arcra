@@ -59,8 +59,28 @@ pub async fn get_delete_account(State(state): State<Arc<AppState>>) -> Response 
     AccountDeletePage::show(&state.tera, accounts)
 }
 
-pub async fn post_delete_account() -> Response {
-    todo!()
+#[derive(Deserialize)]
+pub struct AccountDeleteForm {
+    #[serde(default)]
+    ids: Vec<i64>,
+}
+
+pub async fn post_delete_account(
+    State(state): State<Arc<AppState>>,
+    flash: Flash,
+    form: axum_extra::extract::Form<AccountDeleteForm>,
+) -> Response {
+    if form.ids.len() == 0 {
+        return Redirect::to("/accounts/delete").into_response();
+    }
+
+    Account::drop_all(&state.pool, &form.ids).await;
+    if form.ids.len() > 1 {
+        flash.set("Accounts were deleted.".to_string());
+    } else {
+        flash.set("Account deleted.".to_string());
+    }
+    Redirect::to("/accounts/list").into_response()
 }
 
 pub async fn get_modify_account(

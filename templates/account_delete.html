@@ -6,7 +6,7 @@
 <h2>Delete Account</h2>
 <form method="post" action="/accounts/delete">
     {% for account in accounts %}
-    <input type="checkbox" name="ids" id="{{ account.id }}" >
+    <input type="checkbox" name="ids" id="{{ account.id }}" value="{{ account.id }}" >
     <label for="{{ account.id }}">
         {{ account.name }} -
         {{ account.account_type }} -
