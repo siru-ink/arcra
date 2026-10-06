@@ -1,0 +1,22 @@
+use sqlx::{SqlitePool, query_as};
+
+pub struct AccountTypes {
+    id: i64,
+    name: String,
+    balance_type: String,
+}
+
+impl AccountTypes {
+    pub async fn list_all(pool: &SqlitePool) -> Vec<AccountTypes> {
+        match query_as!(AccountTypes, "SELECT * FROM account_types")
+            .fetch_all(pool)
+            .await
+        {
+            Ok(account_types) => account_types,
+            Err(e) => {
+                eprintln!("Failed to access account_types in database: {}", e);
+                vec![]
+            }
+        }
+    }
+}

@@ -5,6 +5,7 @@ use sqlx::{
 use std::{path::Path, str::FromStr, time::Duration};
 
 mod account;
+mod account_types;
 mod currency;
 mod record;
 mod session;
