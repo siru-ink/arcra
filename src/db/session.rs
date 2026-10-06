@@ -1,5 +1,5 @@
 use chrono::{DateTime, Duration, Utc};
-use sqlx::{SqlitePool, query_as};
+use sqlx::{SqlitePool, query, query_as};
 
 pub struct Session {
     id: i64,
@@ -38,5 +38,16 @@ impl Session {
 
     pub fn id(&self) -> i64 {
         self.id
+    }
+
+    pub async fn vacuum(pool: &SqlitePool) {
+        // Best effort function. If it fails log an error but do nothing else
+        let result = query!("DELETE FROM sessions WHERE valid_until < ?", Utc::now())
+            .execute(pool)
+            .await;
+
+        if let Err(reason) = result {
+            eprintln!("Deleting past sessions from database failed: {}", reason);
+        }
     }
 }
