@@ -105,3 +105,19 @@ impl AccountCreatePage {
         }
     }
 }
+
+pub struct AccountDeletePage {}
+
+impl AccountDeletePage {
+    pub fn show(tera: &Tera, accounts: Vec<Account>) -> Response {
+        let mut context = Context::new();
+
+        context.insert("pagenav", &true);
+        context.insert("accounts", &accounts);
+
+        match tera.render("account_delete.html", &context) {
+            Ok(page) => Html(page).into_response(),
+            Err(_) => ErrorPage::show(tera, "Tera failed to render <account_delete.html> template"),
+        }
+    }
+}

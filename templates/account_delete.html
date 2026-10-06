@@ -1,0 +1,21 @@
+{% extends '_base.html' %}
+
+{% block title %}Delete Accounts | {% endblock title %}
+
+{% block content %}
+<h2>Delete Account</h2>
+<form method="post" action="/accounts/delete">
+    {% for account in accounts %}
+    <input type="checkbox" name="ids" id="{{ account.id }}" >
+    <label for="{{ account.id }}">
+        {{ account.name }} -
+        {{ account.account_type }} -
+        {{ account.balance }} -
+        {{ account.currency }}
+    </label>
+    <br>
+    {% endfor %}
+    <br>
+    <button type="submit">Permanently Delete</button>
+</form>
+{% endblock content %}
