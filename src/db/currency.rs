@@ -1,5 +1,7 @@
+use serde::Serialize;
 use sqlx::{SqlitePool, query_as};
 
+#[derive(Serialize)]
 pub struct Currency {
     id: i64,
     name: String,

@@ -1,0 +1,27 @@
+{% extends '_base.html' %}
+
+{% block title %}Accounts List | {% endblock title %}
+
+{% block content %}
+<h2>Create New Account</h2>
+<form method="post" action="/accounts/create">
+    <label for="name">Name:</label>
+    <input type="text" name="name" id="name" required />
+    <br>
+    <label for="currency">Currency:</label>
+    <select name="currency" id="currency" required >
+        <option disabled >--Please select--</option>
+        {% for currency in currencies %}
+        <option value="{{ currency.id }}">{{ currency.name }}</option>
+        {% endfor %}
+    </select>
+    <br>
+    <label for="account_type">Account Type:</label>
+    <select name="account_type" id="account_type" required >
+        <option disabled >--Please select--</option>
+        {% for account_type in account_types %}
+        <option value="{{ account_type.id }}">{{ account_type.name }}</option>
+        {% endfor %}
+    </select>
+</form>
+{% endblock content %}

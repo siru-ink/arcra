@@ -1,4 +1,4 @@
-use crate::db::Account;
+use crate::db::{Account, AccountType, Currency};
 use axum::{
     http::StatusCode,
     response::{Html, IntoResponse, Response},
@@ -81,6 +81,27 @@ impl AccountListPage {
         match tera.render("account_list.html", &context) {
             Ok(page) => Html(page).into_response(),
             Err(_) => ErrorPage::show(tera, "Tera failed to render <account_list.html> template"),
+        }
+    }
+}
+
+pub struct AccountCreatePage {}
+
+impl AccountCreatePage {
+    pub fn show(
+        tera: &Tera,
+        currencies: Vec<Currency>,
+        account_types: Vec<AccountType>,
+    ) -> Response {
+        let mut context = Context::new();
+
+        context.insert("pagenav", &true);
+        context.insert("currencies", &currencies);
+        context.insert("account_types", &account_types);
+
+        match tera.render("account_create.html", &context) {
+            Ok(page) => Html(page).into_response(),
+            Err(_) => ErrorPage::show(tera, "Tera failed to render <account_create.html> template"),
         }
     }
 }
