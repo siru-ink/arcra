@@ -26,7 +26,7 @@ INSERT INTO currencies (name, descriptor, symbol) VALUES
 CREATE TABLE accounts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
-    currency INTEGER REFERENCES currencies(id) ON DELETE RESTRICT,
+    currency INTEGER NOT NULL REFERENCES currencies(id) ON DELETE RESTRICT,
     balance INTEGER NOT NULL,
     account_type INTEGER NOT NULL REFERENCES account_types(id) ON DELETE RESTRICT
 );
