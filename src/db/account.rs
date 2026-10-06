@@ -67,4 +67,16 @@ impl Account {
         .await
         .ok()?
     }
+
+    pub async fn rename(&self, pool: &SqlitePool, new_name: &str) {
+        if self.name != new_name {
+            let _ = query!(
+                "UPDATE accounts SET name = ? WHERE id = ?",
+                new_name,
+                self.id
+            )
+            .execute(pool)
+            .await;
+        }
+    }
 }
