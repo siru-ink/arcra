@@ -7,8 +7,8 @@ pub struct AccountType {
 }
 
 impl AccountType {
-    pub async fn list_all(pool: &SqlitePool) -> Vec<AccountTypes> {
-        match query_as!(AccountTypes, "SELECT * FROM account_types")
+    pub async fn list_all(pool: &SqlitePool) -> Vec<AccountType> {
+        match query_as!(AccountType, "SELECT * FROM account_types")
             .fetch_all(pool)
             .await
         {
