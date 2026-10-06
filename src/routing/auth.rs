@@ -1,7 +1,7 @@
 use crate::{
     AppState, PASSWORD_HASH, USERNAME,
     crumble::{Flash, Session},
-    template::LoginPage,
+    template::{LoginPage, LogoutPage},
 };
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use axum::{
@@ -49,4 +49,9 @@ pub async fn post_login(flash: Flash, session: Session, Form(form): Form<LoginFo
     session.set_new().await;
 
     Redirect::to("/").into_response()
+}
+
+pub async fn get_logout(State(state): State<Arc<AppState>>, session: Session) -> Response {
+    session.remove().await;
+    LogoutPage::show(&state.tera)
 }
