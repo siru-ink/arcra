@@ -82,7 +82,7 @@ pub async fn get_modify_account(
     let account = match Account::get(&state.pool, account_id).await {
         Some(account) => account,
         None => {
-            flash.set("Now account could be found with the provided id. Please select one of the accounts below.".to_string());
+            flash.set("No account could be found with the provided id. Please select one of the accounts below.".to_string());
             return Redirect::to("/accounts/list").into_response();
         }
     };
