@@ -1,12 +1,12 @@
 use sqlx::{SqlitePool, query_as};
 
-pub struct AccountTypes {
+pub struct AccountType {
     id: i64,
     name: String,
     balance_type: String,
 }
 
-impl AccountTypes {
+impl AccountType {
     pub async fn list_all(pool: &SqlitePool) -> Vec<AccountTypes> {
         match query_as!(AccountTypes, "SELECT * FROM account_types")
             .fetch_all(pool)

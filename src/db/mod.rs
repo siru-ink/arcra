@@ -5,13 +5,13 @@ use sqlx::{
 use std::{path::Path, str::FromStr, time::Duration};
 
 mod account;
-mod account_types;
+mod account_type;
 mod currency;
 mod record;
 mod session;
 
 pub use account::Account;
-pub use account_types::AccountTypes;
+pub use account_type::AccountType;
 pub use currency::Currency;
 pub use session::Session;
 
