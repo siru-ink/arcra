@@ -11,7 +11,7 @@ use crate::{
     AppState,
     crumble::{Flash, Session},
     db::Currency,
-    template::{CurrencyCreatePage, CurrencyListPage},
+    template::{CurrencyCreatePage, CurrencyDeletePage, CurrencyListPage},
 };
 
 pub async fn get_currencies(State(state): State<Arc<AppState>>, flash: Flash) -> Response {
@@ -51,10 +51,34 @@ pub async fn post_create_currency(
     Redirect::to("/currencies/list").into_response()
 }
 
-pub async fn get_delete_currency() -> Response {
-    todo!()
+pub async fn get_delete_currency(State(state): State<Arc<AppState>>, session: Session) -> Response {
+    if !session.valid().await {
+        return Redirect::to("/login").into_response();
+    }
+
+    let currencies = Currency::list_all(&state.pool).await;
+    CurrencyDeletePage::show(&state.tera, currencies)
 }
 
-pub async fn post_delete_currency() -> Response {
-    todo!()
+#[derive(Deserialize)]
+pub struct CurrencyDeleteForm {
+    id: i64,
+}
+
+pub async fn post_delete_currency(
+    State(state): State<Arc<AppState>>,
+    session: Session,
+    flash: Flash,
+    form: Form<CurrencyDeleteForm>,
+) -> Response {
+    if !session.valid().await {
+        return Redirect::to("/login").into_response();
+    }
+
+    if Currency::delete(&state.pool, form.id).await {
+        flash.set("Currency deleted successfully.".to_string());
+    } else {
+        flash.set("Currency could not be deleted. Is it maybe still in use?".to_string());
+    }
+    Redirect::to("/currencies/list").into_response()
 }
