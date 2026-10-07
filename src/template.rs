@@ -1,4 +1,4 @@
-use crate::db::{Account, AccountType, Currency};
+use crate::db::{Account, AccountType, Currency, Transaction, TransactionsRoundedCurrencyValues};
 use axum::{
     http::StatusCode,
     response::{Html, IntoResponse, Response},
@@ -193,6 +193,34 @@ impl CurrencyDeletePage {
                 tera,
                 "Tera failed to render <currency_delete.html> template.",
             ),
+        }
+    }
+}
+
+pub struct TransactionListPage {}
+
+impl TransactionListPage {
+    pub fn show(tera: &Tera, transactions: Vec<Transaction>, flash: Option<String>) -> Response {
+        let transformed_transactions = TransactionsRoundedCurrencyValues::from(transactions);
+
+        let mut context = Context::new();
+
+        context.insert("pagenav", &true);
+        context.insert("transactions", &transformed_transactions);
+
+        if let Some(message) = flash {
+            context.insert("flash", &message);
+        }
+
+        match tera.render("transaction_list.html", &context) {
+            Ok(page) => Html(page).into_response(),
+            Err(e) => {
+                eprintln!("Error: {}", e);
+                ErrorPage::show(
+                    tera,
+                    "Tera failed to render <transaction_list.html> template.",
+                )
+            }
         }
     }
 }

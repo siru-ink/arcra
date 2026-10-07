@@ -1,0 +1,20 @@
+{% extends '_base.html' %}
+
+{% block title %}Transactions List | {% endblock title %}
+
+{% block content %}
+<h2>Transactions List</h2>
+<ul>
+    {% for transaction in transactions %}
+    <li>
+        ({{ transaction.time | truncate(length=10, end="") }}) <a href="/transactions/delete?transaction_id={{ transaction.id }}">{{ transaction.description }}</a> -
+        {{ transaction.credit_account }}
+        {{ transaction.credit_amount | round(method="ceil", precision=2) }}
+        {{ transaction.credit_currency }} -
+        {{ transaction.debit_account }}
+        {{ transaction.debit_amount | round(method="ceil", precision=2) }}
+        {{ transaction.debit_currency }}
+    </li>
+    {% endfor %}
+</ul>
+{% endblock content %}
