@@ -7,13 +7,14 @@ use std::{path::Path, str::FromStr, time::Duration};
 mod account;
 mod account_type;
 mod currency;
-mod record;
 mod session;
+mod transaction;
 
 pub use account::Account;
 pub use account_type::AccountType;
 pub use currency::Currency;
 pub use session::Session;
+pub use transaction::Transaction;
 
 async fn apply_db_migrations(pool: &SqlitePool) -> Result<(), MigrateError> {
     let migrator = Migrator::new(Path::new("./migrations")).await?;
