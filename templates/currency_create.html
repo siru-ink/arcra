@@ -1,0 +1,19 @@
+{% extends '_base.html' %}
+
+{% block title %}Create Currency | {% endblock title %}
+
+{% block content %}
+<h2>Create New Currency</h2>
+<form method="post" action="/currencies/create">
+    <label for="name">Name:</label>
+    <input type="text" name="name" id="name" placeholder="USD" required />
+    <br>
+    <label for="descriptor">Descriptor:</label>
+    <input type="text" name="descriptor" id="descriptor" placeholder="united states dollar" required />
+    <br>
+    <label for="symbol">Symbol:</label>
+    <input type="text" name="symbol" id="symbol" placeholder="$" required />
+    <br>
+    <button type="submit">Create</button>
+</form>
+{% endblock content %}

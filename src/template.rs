@@ -161,3 +161,21 @@ impl CurrencyListPage {
         }
     }
 }
+
+pub struct CurrencyCreatePage {}
+
+impl CurrencyCreatePage {
+    pub fn show(tera: &Tera) -> Response {
+        let mut context = Context::new();
+
+        context.insert("pagenav", &true);
+
+        match tera.render("currency_create.html", &context) {
+            Ok(page) => Html(page).into_response(),
+            Err(_) => ErrorPage::show(
+                tera,
+                "Tera failed to render <currency_create.html> template.",
+            ),
+        }
+    }
+}
