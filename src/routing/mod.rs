@@ -48,7 +48,7 @@ pub fn get() -> Router<Arc<AppState>> {
         )
         .route(
             "/transactions/create",
-            routing::get(transactions::get_create),
+            routing::get(transactions::get_create).post(transactions::post_create),
         )
 }
 
