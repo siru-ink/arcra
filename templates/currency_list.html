@@ -1,0 +1,12 @@
+{% extends '_base.html' %}
+
+{% block title %}Currencies List | {% endblock title %}
+
+{% block content %}
+<h2>Currencies List</h2>
+<ul>
+    {% for currency in currencies %}
+    <li>{{ currency.name }} - {{ currency.descriptor }} - {{ currency.symbol }}</li>
+    {% endfor %}
+</ul>
+{% endblock content %}

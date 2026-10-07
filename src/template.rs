@@ -141,3 +141,23 @@ impl AccountModifyPage {
         }
     }
 }
+
+pub struct CurrencyListPage {}
+
+impl CurrencyListPage {
+    pub fn show(tera: &Tera, currencies: Vec<Currency>, flash: Option<String>) -> Response {
+        let mut context = Context::new();
+
+        context.insert("pagenav", &true);
+        context.insert("currencies", &currencies);
+
+        if let Some(message) = flash {
+            context.insert("flash", &message);
+        }
+
+        match tera.render("currency_list.html", &context) {
+            Ok(page) => Html(page).into_response(),
+            Err(_) => ErrorPage::show(tera, "Tera failed to render <currency_list.html> template."),
+        }
+    }
+}
