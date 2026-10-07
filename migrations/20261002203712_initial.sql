@@ -31,12 +31,14 @@ CREATE TABLE accounts (
     account_type INTEGER NOT NULL REFERENCES account_types(id) ON DELETE RESTRICT
 );
 
-CREATE TABLE records (
+CREATE TABLE transactions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    description TEXT NOT NULL,
+    time TEXT NOT NULL,
     credit_account INTEGER NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+    credit_amount INTEGER NOT NULL,
     debit_account INTEGER NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
-    amount INTEGER NOT NULL,
-    currency INTEGER REFERENCES currencies(id) ON DELETE RESTRICT
+    debit_amount INTEGER NOT NULL
 );
 
 CREATE TABLE sessions (
