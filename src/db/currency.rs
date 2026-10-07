@@ -1,5 +1,5 @@
 use serde::Serialize;
-use sqlx::{SqlitePool, query_as};
+use sqlx::{SqlitePool, query, query_as};
 
 #[derive(Serialize)]
 pub struct Currency {
@@ -36,5 +36,12 @@ impl Currency {
         .fetch_optional(pool)
         .await
         .is_ok()
+    }
+
+    pub async fn delete(pool: &SqlitePool, id: i64) -> bool {
+        query!("DELETE FROM currencies WHERE id = ?", id)
+            .execute(pool)
+            .await
+            .is_ok()
     }
 }
