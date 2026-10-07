@@ -14,6 +14,7 @@ use std::sync::Arc;
 mod accounts;
 mod auth;
 mod currencies;
+mod transactions;
 
 pub fn get() -> Router<Arc<AppState>> {
     Router::new()
@@ -44,6 +45,10 @@ pub fn get() -> Router<Arc<AppState>> {
         .route(
             "/currencies/delete",
             routing::get(currencies::get_delete_currency).post(currencies::post_delete_currency),
+        )
+        .route(
+            "/transactions/create",
+            routing::get(transactions::get_create),
         )
 }
 
