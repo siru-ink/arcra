@@ -1,0 +1,58 @@
+{% extends '_base.html' %}
+
+{% block title %}Record Transaction | {% endblock title %}
+
+{% block content %}
+<h2>Record Transaction</h2>
+<form method="post" action="/transactions/create">
+    <label for="description">Description:</label>
+    <input type="text" name="description" id="description" placeholder="grocery/shopping/education..." required />
+    <br />
+    <label for="credit_account">Credit Account:</label>
+    <span id="credit_currency"></span>
+    <select name="credit_account" id="credit_account" required>
+        <option value="" data-currency="..." selected disabled>--Please choose--</option>
+        {% for account in accounts %}
+        <option value="{{ account.id }}" data-currency="{{ account.currency }}">{{ account.name }}</option>
+        {% endfor %}
+    </select>
+    <br />
+    <label for="credit_amount">Credit Amount:</label>
+    <input type="number" name="credit_amount" id="credit_amount" required />
+    <br />
+    <label for="debit_account">Debit Account:</label>
+    <span id="debit_currency"></span>
+    <select name="debit_account" id="debit_account" required>
+        <option value="" data-currency="..." selected disabled>--Please choose--</option>
+        {% for account in accounts %}
+        <option value="{{ account.id }}" data-currency="{{ account.currency }}">{{ account.name }}</option>
+        {% endfor %}
+    </select>
+    <br />
+    <label for="debit_amount">Debit Amount:</label>
+    <input type="number" name="debit_amount" id="debit_amount" required />
+    <br />
+    <button type="submit">Record</button>
+</form>
+
+<script>
+  (function () {
+    function showCurrency(selectID, displayID) {
+      var select  = document.getElementById(selectID);
+      var display = document.getElementById(displayID);
+      if (!select || !display) return;
+
+      function update() {
+        var opt = select.options[select.selectedIndex];
+        display.textContent = opt ? opt.dataset.currency : '...';
+      }
+
+      select.addEventListener('change', update);
+      update(); // sync on first load
+    }
+
+    showCurrency("credit_account", "credit_currency");
+    showCurrency("debit_account", "debit_currency");
+  })();
+</script>
+{% endblock content %}
