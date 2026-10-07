@@ -1,0 +1,18 @@
+{% extends '_base.html' %}
+
+{% block title %}Delete Currency | {% endblock title %}
+
+{% block content %}
+<h2>Delete Currency</h2>
+<form method="post" action="/currencies/delete">
+    <label for="id">Select Currency:</label>
+    <select name="id" id="id">
+        <option disabled selected value="" >--Please select--</option>
+        {% for currency in currencies %}
+        <option value="{{ currency.id }}" >{{ currency.name }}</option>
+        {% endfor %}
+    </select>
+    <br>
+    <button type="submit">(Attempt) Permanent Delete</button>
+</form>
+{% endblock content %}

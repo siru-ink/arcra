@@ -179,3 +179,20 @@ impl CurrencyCreatePage {
         }
     }
 }
+
+pub struct CurrencyDeletePage {}
+
+impl CurrencyDeletePage {
+    pub fn show(tera: &Tera, currencies: Vec<Currency>) -> Response {
+        let mut context = Context::new();
+        context.insert("pagenav", &true);
+        context.insert("currencies", &currencies);
+        match tera.render("currency_delete.html", &context) {
+            Ok(page) => Html(page).into_response(),
+            Err(_) => ErrorPage::show(
+                tera,
+                "Tera failed to render <currency_delete.html> template.",
+            ),
+        }
+    }
+}
