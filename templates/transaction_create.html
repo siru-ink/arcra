@@ -39,52 +39,47 @@
 
 <script>
   (function () {
+    const creditAccount = document.getElementById("credit_account");
+    const debitAccount = document.getElementById("debit_account");
+    const creditDisplay = document.getElementById("credit_currency");
+    const debitDisplay = document.getElementById("debit_currency");
+    const debitAmountGroup = document.getElementById("debit_amount_group");
+    const debitAmountInput = document.getElementById("debit_amount");
+
     function getCurrency(account) {
-      if (!account || account.selectedIndex < 0 ) {
+      if (!account || account.selectedIndex < 0) {
         return "...";
       }
-      var temp = account.options[account.selectedIndex].dataset.currency;
-      console.log(temp)
-      return temp;
+      return account.options[account.selectedIndex].dataset.currency;
     }
 
-    function updateCurrencyDisplay(account, display) {
-      display.textContent = getCurrency(account);
+    function updateCurrencyDisplay(display, currency) {
+      display.textContent = currency;
     }
 
-    var creditAccount = document.getElementById("credit_account");
-    var debitAccount = document.getElementById("debit_account");
-    var creditDisplay = document.getElementById("credit_currency");
-    var debitDisplay = document.getElementById("debit_currency");
-    var debitAmountDisplay = document.getElementById("debit_amount_group");
-    var debitAmountIntput = document.getElementById("debit_amount");
+    function updateAll() {
+      const creditCurrency = getCurrency(creditAccount);
+      const debitCurrency = getCurrency(debitAccount);
 
-    updateCurrencyDisplay(creditAccount, creditDisplay);
-    updateCurrencyDisplay(debitAccount, debitDisplay);
+      updateCurrencyDisplay(creditDisplay, creditCurrency);
+      updateCurrencyDisplay(debitDisplay, debitCurrency);
 
-    creditAccount.addEventListener("change", () => updateCurrencyDisplay(creditAccount, creditDisplay));
-    debitAccount.addEventListener("change", () => updateCurrencyDisplay(debitAccount, debitDisplay));
-
-    function updateDebitAmountDisplay(creditAccount, debitAccount, display, input) {
-      var creditCurrency = getCurrency(creditAccount);
-      var debitCurrency = getCurrency(debitAccount);
-
-      if ((creditCurrency === "...") || (debitCurrency === "...")) {
-        display.style.display = "none";
-        input.required = true;
+      if (creditCurrency === "..." || debitCurrency === "...") {
+        debitAmountGroup.style.display = "none";
+        debitAmountInput.required = true;
       } else if (creditCurrency === debitCurrency) {
-        display.style.display = "none";
-        input.required = false;
+        debitAmountGroup.style.display = "none";
+        debitAmountInput.required = false;
       } else {
-        display.style.display = "block";
-        input.required = true;
+        debitAmountGroup.style.display = "block";
+        debitAmountInput.required = true;
       }
     }
 
-    updateDebitAmountDisplay(creditAccount, debitAccount, debitAmountDisplay, debitAmountIntput);
+    updateAll();
 
-    creditAccount.addEventListener("change", () => updateDebitAmountDisplay(creditAccount, debitAccount, debitAmountDisplay, debitAmountIntput));
-    debitAccount.addEventListener("change", () => updateDebitAmountDisplay(creditAccount, debitAccount, debitAmountDisplay, debitAmountIntput));
+    creditAccount.addEventListener("change", updateAll);
+    debitAccount.addEventListener("change", updateAll);
   })();
 </script>
 {% endblock content %}
