@@ -36,7 +36,7 @@ pub struct TransactionCreateForm {
     credit_account: i64,
     credit_amount: f64,
     debit_account: i64,
-    debit_amount: f64,
+    debit_amount: Option<f64>,
 }
 
 pub async fn post_create(
@@ -55,7 +55,35 @@ pub async fn post_create(
     }
 
     let credit_amount = (form.credit_amount * 100.0).round() as i64;
-    let debit_amount = (form.debit_amount * 100.0).round() as i64;
+
+    let debit_amount: i64;
+    if let Some(amount) = form.debit_amount {
+        debit_amount = (amount * 100.0).round() as i64;
+    } else {
+        let credit_currency = match Account::get(&state.pool, form.credit_account).await {
+            Some(account) => account.currency().to_owned(),
+            None => {
+                flash.set("Could not confirm both accounts use the same currency.".to_string());
+                return Redirect::to("/transactions/create").into_response();
+            }
+        };
+        let debit_currency = match Account::get(&state.pool, form.debit_account).await {
+            Some(account) => account.currency().to_owned(),
+            None => {
+                flash.set("Could not confirm both accounts use the same currency.".to_string());
+                return Redirect::to("/transactions/create").into_response();
+            }
+        };
+
+        if credit_currency == debit_currency {
+            debit_amount = (form.credit_amount * 100.0).round() as i64;
+        } else {
+            flash.set(
+                "Both accounts must use the same currency to leave debit amount empty.".to_string(),
+            );
+            return Redirect::to("/transactions/create").into_response();
+        }
+    }
 
     if credit_amount <= 0 || debit_amount <= 0 {
         flash.set("Credit and debit amounts must be non-zero, positive values.".to_string());

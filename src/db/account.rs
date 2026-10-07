@@ -90,4 +90,8 @@ impl Account {
 
         let _ = sql_builder.build().execute(pool).await;
     }
+
+    pub fn currency(&self) -> &str {
+        &self.currency
+    }
 }
