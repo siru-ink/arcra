@@ -22,4 +22,19 @@ impl Currency {
             }
         }
     }
+
+    pub async fn new(pool: &SqlitePool, name: &str, descriptor: &str, symbol: &str) -> bool {
+        query_as!(
+            Currency,
+            "INSERT INTO currencies (name, descriptor, symbol)
+             VALUES (?,?,?)
+             RETURNING id,name,descriptor,symbol",
+            name,
+            descriptor,
+            symbol
+        )
+        .fetch_optional(pool)
+        .await
+        .is_ok()
+    }
 }
