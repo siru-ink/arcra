@@ -46,6 +46,7 @@ pub fn get() -> Router<Arc<AppState>> {
             "/currencies/delete",
             routing::get(currencies::get_delete_currency).post(currencies::post_delete_currency),
         )
+        .route("/transactions/list", routing::get(transactions::get_list))
         .route(
             "/transactions/create",
             routing::get(transactions::get_create).post(transactions::post_create),

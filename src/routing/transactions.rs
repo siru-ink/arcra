@@ -2,7 +2,7 @@ use crate::{
     AppState,
     crumble::{Flash, Session},
     db::{Account, Transaction},
-    template::TransactionCreatePage,
+    template::{TransactionCreatePage, TransactionListPage},
 };
 use axum::{
     extract::State,
@@ -11,6 +11,19 @@ use axum::{
 use axum_extra::extract::Form;
 use serde::Deserialize;
 use std::sync::Arc;
+
+pub async fn get_list(
+    State(state): State<Arc<AppState>>,
+    session: Session,
+    flash: Flash,
+) -> Response {
+    if !session.valid().await {
+        return Redirect::to("/login").into_response();
+    }
+
+    let transactions = Transaction::list_all(&state.pool).await;
+    TransactionListPage::show(&state.tera, transactions, flash.message())
+}
 
 pub async fn get_create(State(state): State<Arc<AppState>>, flash: Flash) -> Response {
     let accounts = Account::list_all(&state.pool).await;
