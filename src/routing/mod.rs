@@ -19,6 +19,7 @@ mod transactions;
 pub fn get() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", routing::get(get_index))
+        .route("/healthcheck", routing::get(get_healthcheck))
         .route(
             "/login",
             routing::get(auth::get_login).post(auth::post_login),
@@ -58,4 +59,9 @@ async fn get_index(State(state): State<Arc<AppState>>, flash: Flash, session: Se
         true => IndexPage::show(&state.tera, flash.message()),
         false => Redirect::to("/login").into_response(),
     }
+}
+
+async fn get_healthcheck() -> Response {
+    // TODO improve this
+    "ok".into_response()
 }
