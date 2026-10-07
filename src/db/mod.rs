@@ -14,7 +14,7 @@ pub use account::Account;
 pub use account_type::AccountType;
 pub use currency::Currency;
 pub use session::Session;
-pub use transaction::Transaction;
+pub use transaction::{Transaction, TransactionsRoundedCurrencyValues};
 
 async fn apply_db_migrations(pool: &SqlitePool) -> Result<(), MigrateError> {
     let migrator = Migrator::new(Path::new("./migrations")).await?;
