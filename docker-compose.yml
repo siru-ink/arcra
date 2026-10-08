@@ -1,0 +1,21 @@
+name: arcra
+
+services:
+  app:
+    image: arcra:latest
+    container_name: arcra-app
+    restart: unless-stopped
+    ports:
+      # Map your outside port as needed. It is recommended to only run this app
+      # behind a reverse proxy such as nginx, apache, or caddy.
+      - "127.0.0.1:8160:80"
+    environment:
+      USERNAME: "siru"
+      PASSWORD: "Easy2Remember?"
+      # Generate a secret key using e.g. `openssl rand -base64 64`
+      COOKIEKEY: "uWdOOHChVrk+nNsVFVizPDJcO3WCiWGFQfLMe1sPPEXufd4sr6/EzNwcmQv+Uh/b8WYLKjxeVORRe4f/YX0KlQ=="
+    volumes:
+      - data:/data
+
+volumes:
+  data:
