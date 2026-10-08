@@ -1,4 +1,7 @@
-use crate::db::{Account, AccountType, Currency, Transaction, TransactionsRoundedCurrencyValues};
+use crate::db::{
+    Account, AccountRoundedBalanceValues, AccountType, Currency, Transaction,
+    TransactionsRoundedCurrencyValues,
+};
 use axum::{
     http::StatusCode,
     response::{Html, IntoResponse, Response},
@@ -73,6 +76,8 @@ pub struct AccountListPage {}
 
 impl AccountListPage {
     pub fn show(tera: &Tera, accounts: Vec<Account>, flash: Option<String>) -> Response {
+        let accounts = AccountRoundedBalanceValues::from(accounts);
+
         let mut context = Context::new();
 
         context.insert("pagenav", &true);

@@ -149,3 +149,27 @@ impl Account {
         &self.currency
     }
 }
+
+#[derive(Serialize)]
+pub struct AccountRoundedBalanceValues {
+    id: i64,
+    name: String,
+    currency: String,
+    balance: f64,
+    account_type: String,
+}
+
+impl AccountRoundedBalanceValues {
+    pub fn from(accounts: Vec<Account>) -> Vec<AccountRoundedBalanceValues> {
+        accounts
+            .into_iter()
+            .map(|a| AccountRoundedBalanceValues {
+                id: a.id,
+                name: a.name,
+                currency: a.currency,
+                balance: a.balance as f64 / 100.0,
+                account_type: a.account_type,
+            })
+            .collect()
+    }
+}
