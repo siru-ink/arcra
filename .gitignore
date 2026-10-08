@@ -3,3 +3,6 @@
 
 # Runtime file uploads
 /data
+
+# Docker build files
+/.sqlx
