@@ -11,6 +11,60 @@ pub struct Account {
 }
 
 impl Account {
+    pub async fn increase_balance(pool: &SqlitePool, account_id: i64, amount: i64) -> bool {
+        struct Balance {
+            balance: i64,
+        }
+
+        let account_balance = match query_as!(
+            Balance,
+            "SELECT balance FROM accounts WHERE id = ?",
+            account_id
+        )
+        .fetch_one(pool)
+        .await
+        {
+            Ok(balance) => balance,
+            Err(_) => return false,
+        };
+
+        query!(
+            "UPDATE accounts SET balance = ? WHERE id = ?",
+            (account_balance.balance + amount),
+            account_id
+        )
+        .execute(pool)
+        .await
+        .is_ok()
+    }
+
+    pub async fn decrease_balance(pool: &SqlitePool, account_id: i64, amount: i64) -> bool {
+        struct Balance {
+            balance: i64,
+        }
+
+        let account_balance = match query_as!(
+            Balance,
+            "SELECT balance FROM accounts WHERE id = ?",
+            account_id
+        )
+        .fetch_one(pool)
+        .await
+        {
+            Ok(balance) => balance,
+            Err(_) => return false,
+        };
+
+        query!(
+            "UPDATE accounts SET balance = ? WHERE id = ?",
+            (account_balance.balance - amount),
+            account_id
+        )
+        .execute(pool)
+        .await
+        .is_ok()
+    }
+
     pub async fn list_all(pool: &SqlitePool) -> Vec<Account> {
         match query_as!(
             Account,

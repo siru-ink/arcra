@@ -90,7 +90,7 @@ pub async fn post_create(
         return Redirect::to("/transactions/create").into_response();
     }
 
-    Transaction::new(
+    let transaction_succeeded = Transaction::new(
         &state.pool,
         &form.description,
         form.credit_account,
@@ -99,6 +99,11 @@ pub async fn post_create(
         debit_amount,
     )
     .await;
+
+    if transaction_succeeded {
+        Account::increase_balance(&state.pool, form.debit_account, debit_amount).await;
+        Account::decrease_balance(&state.pool, form.credit_account, credit_amount).await;
+    }
 
     flash.set("Transaction recorded successfully.".to_string());
     Redirect::to("/transactions/list").into_response()
