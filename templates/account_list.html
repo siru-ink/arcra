@@ -6,7 +6,7 @@
 <h2>Accounts List</h2>
 <ul>
     {% for account in accounts %}
-    <li><a href="/accounts/modify?account_id={{ account.id }}">{{ account.name }}</a> - {{ account.account_type }} - {{ account.balance }} - {{ account.currency }}</li>
+    <li><a href="/accounts/modify?account_id={{ account.id }}">{{ account.name }}</a> - {{ account.account_type }} - {{ account.currency }}&nbsp;{{ account.balance | round(method="ceil", precision=2) }}</li>
     {% endfor %}
 </ul>
 {% endblock content %}
