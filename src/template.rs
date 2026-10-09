@@ -252,3 +252,22 @@ impl TransactionCreatePage {
         }
     }
 }
+
+pub struct TransactionDeletePage {}
+
+impl TransactionDeletePage {
+    pub fn show(tera: &Tera, transaction: Vec<TransactionsRoundedCurrencyValues>) -> Response {
+        let mut context = Context::new();
+
+        context.insert("pagenav", &true);
+        context.insert("transaction", &transaction[0]);
+
+        match tera.render("transaction_delete.html", &context) {
+            Ok(page) => Html(page).into_response(),
+            Err(_) => ErrorPage::show(
+                tera,
+                "Tera failed to render <transaction_delete.html> template.",
+            ),
+        }
+    }
+}
