@@ -1,16 +1,16 @@
 use crate::{
     AppState,
     crumble::{Flash, Session},
-    db::{Account, Transaction},
-    template::{TransactionCreatePage, TransactionListPage},
+    db::{Account, Transaction, TransactionsRoundedCurrencyValues},
+    template::{TransactionCreatePage, TransactionDeletePage, TransactionListPage},
 };
 use axum::{
-    extract::State,
+    extract::{Query, State},
     response::{IntoResponse, Redirect, Response},
 };
 use axum_extra::extract::Form;
 use serde::Deserialize;
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 pub async fn get_list(
     State(state): State<Arc<AppState>>,
@@ -107,4 +107,52 @@ pub async fn post_create(
 
     flash.set("Transaction recorded successfully.".to_string());
     Redirect::to("/transactions/list").into_response()
+}
+
+pub async fn get_delete(
+    State(state): State<Arc<AppState>>,
+    session: Session,
+    Query(params): Query<HashMap<String, String>>,
+) -> Response {
+    if !session.valid().await {
+        return Redirect::to("/login").into_response();
+    }
+
+    let raw_transaction_id = match params.get("transaction_id") {
+        Some(id) => id,
+        None => return Redirect::to("/transactions/list").into_response(),
+    };
+
+    let transaction_id = match raw_transaction_id.parse::<i64>() {
+        Ok(id) => id,
+        Err(_) => return Redirect::to("/transactions/list").into_response(),
+    };
+
+    let transaction = match Transaction::get(&state.pool, transaction_id).await {
+        Some(transaction) => transaction,
+        None => return Redirect::to("/transactions/list").into_response(),
+    };
+
+    let converted_transaction = TransactionsRoundedCurrencyValues::from(vec![transaction]);
+
+    TransactionDeletePage::show(&state.tera, converted_transaction)
+}
+
+#[derive(Deserialize)]
+pub struct TransactionDeleteForm {
+    id: i64,
+}
+
+pub async fn post_delete(
+    State(state): State<Arc<AppState>>,
+    flash: Flash,
+    form: Form<TransactionDeleteForm>,
+) -> Response {
+    if Transaction::drop(&state.pool, form.id).await {
+        flash.set("Transaction deleted successfully.".to_string());
+        return Redirect::to("/transactions/list").into_response();
+    } else {
+        flash.set("Transaction could not be deleted. Please try again.".to_string());
+        return Redirect::to("/transactions/list").into_response();
+    }
 }

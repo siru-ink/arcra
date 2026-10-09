@@ -52,6 +52,10 @@ pub fn get() -> Router<Arc<AppState>> {
             "/transactions/create",
             routing::get(transactions::get_create).post(transactions::post_create),
         )
+        .route(
+            "/transactions/delete",
+            routing::get(transactions::get_delete).post(transactions::post_delete),
+        )
 }
 
 async fn get_index(State(state): State<Arc<AppState>>, flash: Flash, session: Session) -> Response {
