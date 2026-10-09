@@ -2,6 +2,8 @@ use chrono::{DateTime, Utc};
 use serde::Serialize;
 use sqlx::{SqlitePool, query, query_as};
 
+use crate::db::Account;
+
 pub struct Transaction {
     id: i64,
     description: String,
@@ -14,7 +16,68 @@ pub struct Transaction {
     debit_currency: String,
 }
 
+pub struct TransactionBalances {
+    credit_account: i64,
+    credit_amount: i64,
+    debit_account: i64,
+    debit_amount: i64,
+}
+
 impl Transaction {
+    pub async fn drop(pool: &SqlitePool, id: i64) -> bool {
+        let balances = match query_as!(
+            TransactionBalances,
+            "SELECT credit_account, credit_amount, debit_account, debit_amount FROM transactions WHERE id = ?",
+            id
+        )
+        .fetch_one(pool)
+        .await
+        {
+            Ok(bal) => bal,
+            Err(_) => return false,
+        };
+
+        let increase =
+            Account::increase_balance(pool, balances.credit_account, balances.credit_amount).await;
+        let decrease =
+            Account::decrease_balance(pool, balances.debit_account, balances.debit_amount).await;
+
+        if increase && decrease {
+            return query!("DELETE FROM transactions WHERE id = ?", id)
+                .execute(pool)
+                .await
+                .is_ok();
+        }
+
+        false
+    }
+
+    pub async fn get(pool: &SqlitePool, id: i64) -> Option<Transaction> {
+        query_as!(
+            Transaction,
+            "SELECT
+                t.id            as id,
+                t.description   as description,
+                t.time          as \"time: _\",
+                ca.name         as credit_account,
+                t.credit_amount as credit_amount,
+                cforca.symbol   as credit_currency,
+                da.name         as debit_account,
+                t.debit_amount  as debit_amount,
+                cforda.symbol   as debit_currency
+             FROM transactions t
+             JOIN accounts ca on t.credit_account = ca.id
+             JOIN accounts da on t.debit_account = da.id
+             JOIN currencies cforca on ca.currency = cforca.id
+             JOIN currencies cforda on da.currency = cforda.id
+             WHERE t.id = ?",
+            id
+        )
+        .fetch_optional(pool)
+        .await
+        .ok()?
+    }
+
     pub async fn list_all(pool: &SqlitePool) -> Vec<Transaction> {
         match query_as!(
             Transaction,
