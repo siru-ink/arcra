@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::Serialize;
-use sqlx::{SqlitePool, query, query_as};
+use sqlx::{SqliteConnection, SqlitePool, query, query_as};
 
 use crate::db::Account;
 
@@ -109,7 +109,7 @@ impl Transaction {
     }
 
     pub async fn new(
-        pool: &SqlitePool,
+        conn: &mut SqliteConnection,
         description: &str,
         credit_account: i64,
         credit_amount: i64,
@@ -125,7 +125,7 @@ impl Transaction {
             credit_amount,
             debit_account,
             debit_amount
-        ).execute(pool).await.is_ok()
+        ).execute(conn).await.is_ok()
     }
 }
 

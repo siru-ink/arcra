@@ -1,5 +1,5 @@
 use serde::Serialize;
-use sqlx::{QueryBuilder, SqlitePool, query, query_as};
+use sqlx::{QueryBuilder, SqliteConnection, SqlitePool, query, query_as};
 
 #[derive(Serialize)]
 pub struct Account {
@@ -148,6 +148,26 @@ impl Account {
     pub fn currency(&self) -> &str {
         &self.currency
     }
+
+    pub async fn update_balance(
+        &self,
+        conn: &mut SqliteConnection,
+        change_amount: i64,
+    ) -> Result<(), UpdateBalanceError> {
+        let result = query!(
+            "UPDATE accounts SET balance = balance + ? WHERE id = ?",
+            change_amount,
+            self.id
+        )
+        .execute(conn)
+        .await?;
+
+        if result.rows_affected() == 1 {
+            Ok(())
+        } else {
+            Err(UpdateBalanceError::AccountDoesNotExist)
+        }
+    }
 }
 
 #[derive(Serialize)]
@@ -172,4 +192,12 @@ impl AccountRoundedBalanceValues {
             })
             .collect()
     }
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum UpdateBalanceError {
+    #[error("Specified account does not exist in database")]
+    AccountDoesNotExist,
+    #[error("Sqlconnection could not be used to access the database")]
+    SqlConnectionFailed(#[from] sqlx::Error),
 }
