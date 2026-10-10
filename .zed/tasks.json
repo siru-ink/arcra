@@ -49,7 +49,7 @@
   },
   {
     "label": "Remigrate database",
-    "command": "rm -f ./data/data.db && cargo sqlx database create && cargo sqlx migrate run && cargo sqlx prepare",
+    "command": "mkdir -p ./data/ && rm -f ./data/data.db && cargo sqlx database create && cargo sqlx migrate run && cargo sqlx prepare",
     //"args": [],
     "env": { "DATABASE_URL": "sqlite:./data/data.db" },
     "use_new_terminal": false,
