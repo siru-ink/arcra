@@ -87,6 +87,7 @@ dependencies = [
  "serde",
  "sqlx",
  "tera",
+ "thiserror",
  "tokio",
  "tower-cookies",
 ]
