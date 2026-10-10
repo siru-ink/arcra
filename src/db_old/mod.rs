@@ -12,6 +12,7 @@ mod transaction;
 
 pub use account::Account;
 pub use account::AccountRoundedBalanceValues;
+pub use account::ReadAccountError;
 pub use account_type::AccountType;
 pub use currency::Currency;
 pub use session::Session;

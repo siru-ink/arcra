@@ -10,6 +10,20 @@ pub struct Account {
     account_type: String,
 }
 
+impl PartialEq for Account {
+    fn eq(&self, other: &Self) -> bool {
+        (self.id == other.id) && (self.name == other.name)
+    }
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum ReadAccountError {
+    #[error("No account found in database for the given id.")]
+    AccountNotFound,
+    #[error("Something went wrong trying to access the database.")]
+    SqlxError(#[from] sqlx::Error),
+}
+
 impl Account {
     pub async fn increase_balance(pool: &SqlitePool, account_id: i64, amount: i64) -> bool {
         struct Balance {
@@ -120,6 +134,32 @@ impl Account {
         .fetch_optional(pool)
         .await
         .ok()?
+    }
+
+    pub async fn read(conn: &mut SqliteConnection, id: i64) -> Result<Account, ReadAccountError> {
+        #[cfg(debug_assertions)]
+        println!("{}", size_of::<Result<Account, ReadAccountError>>());
+
+        match query_as!(
+            Account,
+            "SELECT accounts.id as id,
+                    accounts.name as name,
+                    currencies.name as currency,
+                    accounts.balance as balance,
+                    account_types.name as account_type
+             FROM accounts
+             JOIN currencies on accounts.currency = currencies.id
+             JOIN account_types on accounts.account_type = account_types.id
+             WHERE accounts.id = ?",
+            id
+        )
+        .fetch_optional(conn)
+        .await
+        {
+            Ok(Some(account)) => Ok(account),
+            Ok(None) => Err(ReadAccountError::AccountNotFound),
+            Err(e) => Err(ReadAccountError::SqlxError(e)),
+        }
     }
 
     pub async fn rename(&self, pool: &SqlitePool, new_name: &str) {
