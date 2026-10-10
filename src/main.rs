@@ -15,6 +15,7 @@ mod crumble;
 mod db;
 mod env;
 mod routing;
+mod services;
 mod template;
 
 struct AppState {
