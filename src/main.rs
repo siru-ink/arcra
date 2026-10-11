@@ -13,6 +13,7 @@ use tower_cookies::{CookieManagerLayer, Key};
 
 mod crumble;
 mod db;
+mod domain;
 mod env;
 mod routing;
 mod services;
