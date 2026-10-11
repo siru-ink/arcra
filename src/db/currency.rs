@@ -33,6 +33,12 @@ struct CurrencyRow {
     symbol: String,
 }
 
+impl From<CurrencyRow> for domain::Currency {
+    fn from(value: CurrencyRow) -> Self {
+        domain::Currency::hydrate(value.id, value.name, value.descriptor, value.symbol)
+    }
+}
+
 impl Db {
     pub async fn create_currency(
         conn: &mut SqliteConnection,
@@ -58,18 +64,22 @@ impl Db {
         .fetch_one(conn)
         .await?;
 
-        Ok(domain::Currency::hydrate(
-            new_currency.id,
-            new_currency.name,
-            new_currency.descriptor,
-            new_currency.symbol,
-        ))
+        Ok(new_currency.into())
     }
 
     pub async fn read_currency(
         conn: &mut SqliteConnection,
+        id: domain::CurrencyID,
     ) -> Result<Option<domain::Currency>, ReadCurrencyError> {
-        todo!()
+        let currency_row = sqlx::query_as!(
+            CurrencyRow,
+            r#"SELECT * FROM currencies WHERE id = ?"#,
+            id.0
+        )
+        .fetch_optional(conn)
+        .await?;
+
+        Ok(currency_row.map(domain::Currency::from))
     }
 
     pub async fn update_currency(conn: &mut SqliteConnection) -> Result<(), UpdateCurrencyError> {
