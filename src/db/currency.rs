@@ -6,12 +6,16 @@ use crate::{db::Db, domain};
 pub enum CreateCurrencyError {
     #[error("Failure in sqlx database connection.")]
     SqlError(#[from] sqlx::Error),
+    #[error("Could not convert database row into domain object.")]
+    HydrateError(#[from] domain::HydrateCurrencyError),
 }
 
 #[derive(Debug, thiserror::Error)]
 pub enum ReadCurrencyError {
     #[error("Failure in sqlx database connection.")]
     SqlError(#[from] sqlx::Error),
+    #[error("Could not convert database row into domain object.")]
+    HydrateError(#[from] domain::HydrateCurrencyError),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -33,8 +37,10 @@ struct CurrencyRow {
     symbol: String,
 }
 
-impl From<CurrencyRow> for domain::Currency {
-    fn from(value: CurrencyRow) -> Self {
+impl TryFrom<CurrencyRow> for domain::Currency {
+    type Error = domain::HydrateCurrencyError;
+
+    fn try_from(value: CurrencyRow) -> Result<Self, Self::Error> {
         domain::Currency::hydrate(value.id, value.name, value.descriptor, value.symbol)
     }
 }
@@ -64,7 +70,7 @@ impl Db {
         .fetch_one(conn)
         .await?;
 
-        Ok(new_currency.into())
+        Ok(new_currency.try_into()?)
     }
 
     pub async fn read_currency(
@@ -77,9 +83,9 @@ impl Db {
             id.0
         )
         .fetch_optional(conn)
-        .await?;
+        .await?; 
 
-        Ok(currency_row.map(domain::Currency::from))
+        Ok(currency_row.map(domain::Currency::try_from).transpose()?)
     }
 
     pub async fn update_currency(conn: &mut SqliteConnection) -> Result<(), UpdateCurrencyError> {

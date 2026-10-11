@@ -1,3 +1,15 @@
+#[derive(Debug, thiserror::Error)]
+pub enum HydrateCurrencyError {
+    #[error("The provided id must be a positive integer.")]
+    InvalidId,
+    #[error("The provided name must not be empty.")]
+    InvalidName,
+    #[error("The provided descriptor must not be empty.")]
+    InvalidDescriptor,
+    #[error("The provided symbol must not be empty.")]
+    InvalidSymbol,
+}
+
 pub struct CurrencyID(pub i64);
 
 pub struct NewCurrency {
@@ -32,7 +44,12 @@ impl Currency {
         self.id
     }
 
-    pub fn hydrate(id: i64, name: String, descriptor: String, symbol: String) -> Self {
+    pub fn hydrate(
+        id: i64,
+        name: String,
+        descriptor: String,
+        symbol: String,
+    ) -> Result<Self, HydrateCurrencyError> {
         todo!()
     }
 }
