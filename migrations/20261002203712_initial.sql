@@ -1,16 +1,3 @@
-CREATE TABLE account_types (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE NOT NULL,
-    balance_type TEXT NOT NULL
-);
-
-INSERT INTO account_types (name, balance_type) VALUES
-('asset', 'debit'),
-('expense', 'debit'),
-('liability', 'credit'),
-('equity', 'credit'),
-('revenue', 'credit');
-
 CREATE TABLE currencies (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
@@ -28,7 +15,7 @@ CREATE TABLE accounts (
     name TEXT UNIQUE NOT NULL,
     currency INTEGER NOT NULL REFERENCES currencies(id) ON DELETE RESTRICT,
     balance INTEGER NOT NULL,
-    account_type INTEGER NOT NULL REFERENCES account_types(id) ON DELETE RESTRICT
+    account_type INTEGER NOT NULL
 );
 
 CREATE TABLE transactions (
