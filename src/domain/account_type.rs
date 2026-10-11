@@ -8,5 +8,7 @@ pub enum AccountType {
 }
 
 impl AccountType {
-    pub fn hydrate(id: i64) -> Self {}
+    pub fn hydrate(id: i64) -> Self {
+        todo!()
+    }
 }
