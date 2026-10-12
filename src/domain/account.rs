@@ -12,7 +12,13 @@ pub enum HydrateAccountError {
     InvalidAccountType(#[from] domain::HydrateAccountTypeError),
 }
 
-pub struct AccountID(pub i64);
+#[derive(Debug, thiserror::Error)]
+pub enum CreateAccountIDError {
+    #[error("The provided id must be non-negative, non-zero.")]
+    InvalidID,
+}
+
+pub struct AccountID(i64);
 
 pub struct NewAccount {
     name: String,
@@ -26,6 +32,22 @@ pub struct Account {
     currency: domain::Currency,
     balance: i64,
     account_type: domain::AccountType,
+}
+
+impl From<AccountID> for i64 {
+    fn from(value: AccountID) -> Self {
+        value.0
+    }
+}
+
+impl AccountID {
+    pub fn new(value: i64) -> Result<Self, CreateAccountIDError> {
+        if value > 0 {
+            Ok(AccountID(value))
+        } else {
+            Err(CreateAccountIDError::InvalidID)
+        }
+    }
 }
 
 impl NewAccount {
