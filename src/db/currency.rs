@@ -107,7 +107,14 @@ impl Db {
         Ok(())
     }
 
-    pub async fn delete_currency(conn: &mut SqliteConnection) -> Result<(), DeleteCurrencyError> {
-        todo!()
+    pub async fn delete_currency(
+        conn: &mut SqliteConnection,
+        id: domain::CurrencyID,
+    ) -> Result<(), DeleteCurrencyError> {
+        let _ = sqlx::query!("DELETE FROM currencies WHERE id = ?", id.0)
+            .execute(conn)
+            .await?;
+
+        Ok(())
     }
 }
