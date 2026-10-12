@@ -5,6 +5,8 @@ use sqlx::SqliteConnection;
 pub enum CreateAccountError {
     #[error("Failure in sqlx database connection.")]
     SqlError(#[from] sqlx::Error),
+    #[error("Could not convert database row into Account domain object.")]
+    HydrateError(#[from] domain::HydrateAccountError),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -75,15 +77,13 @@ impl Db {
         Ok(domain::Account::hydrate(
             new_account.id,
             new_account.name,
-            domain::Currency::hydrate(
-                new_account.currency_id,
-                new_account.currency_name,
-                new_account.currency_descriptor,
-                new_account.currency_symbol,
-            ),
+            new_account.currency_id,
+            new_account.currency_name,
+            new_account.currency_descriptor,
+            new_account.currency_symbol,
             new_account.balance,
-            domain::AccountType::hydrate(new_account.account_type),
-        ))
+            new_account.account_type,
+        )?)
     }
 
     pub async fn read_account(
