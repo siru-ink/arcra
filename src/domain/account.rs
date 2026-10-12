@@ -3,7 +3,7 @@ use crate::domain;
 #[derive(Debug, thiserror::Error)]
 pub enum HydrateAccountError {
     #[error("The provided id must be non-negative, non-zero.")]
-    InvalidId,
+    InvalidID,
     #[error("The provided name must not be empty.")]
     InvalidName,
     #[error("No currency could be hydrated from the provided currency information.")]
@@ -88,7 +88,7 @@ impl Account {
         account_type_id: i64,
     ) -> Result<Self, HydrateAccountError> {
         if id <= 0 {
-            return Err(HydrateAccountError::InvalidId);
+            return Err(HydrateAccountError::InvalidID);
         } else if name.is_empty() {
             return Err(HydrateAccountError::InvalidName);
         }
