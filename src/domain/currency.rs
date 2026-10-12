@@ -25,6 +25,12 @@ pub struct Currency {
     symbol: String,
 }
 
+impl From<Currency> for CurrencyID {
+    fn from(value: Currency) -> Self {
+        Self(value.id)
+    }
+}
+
 impl NewCurrency {
     pub fn name(&self) -> &str {
         &self.name
