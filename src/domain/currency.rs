@@ -40,8 +40,8 @@ impl NewCurrency {
 }
 
 impl Currency {
-    pub fn id(&self) -> i64 {
-        self.id
+    pub fn descriptor(&self) -> &str {
+        &self.descriptor
     }
 
     pub fn hydrate(
@@ -66,5 +66,17 @@ impl Currency {
             descriptor,
             symbol,
         })
+    }
+
+    pub fn id(&self) -> i64 {
+        self.id
+    }
+
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    pub fn symbol(&self) -> &str {
+        &self.symbol
     }
 }
