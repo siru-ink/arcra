@@ -138,7 +138,7 @@ impl Db {
         .execute(conn)
         .await?;
 
-        OK(())
+        Ok(())
     }
 
     pub async fn delete_account(
