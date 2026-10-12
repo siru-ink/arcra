@@ -83,13 +83,28 @@ impl Db {
             id.0
         )
         .fetch_optional(conn)
-        .await?; 
+        .await?;
 
         Ok(currency_row.map(domain::Currency::try_from).transpose()?)
     }
 
-    pub async fn update_currency(conn: &mut SqliteConnection) -> Result<(), UpdateCurrencyError> {
-        todo!()
+    pub async fn update_currency(
+        conn: &mut SqliteConnection,
+        currency: domain::Currency,
+    ) -> Result<(), UpdateCurrencyError> {
+        let _ = sqlx::query!(
+            "UPDATE currencies
+             SET name = ?, descriptor = ?, symbol = ?
+             WHERE id = ?",
+            currency.name(),
+            currency.descriptor(),
+            currency.symbol(),
+            currency.id()
+        )
+        .execute(conn)
+        .await?;
+
+        Ok(())
     }
 
     pub async fn delete_currency(conn: &mut SqliteConnection) -> Result<(), DeleteCurrencyError> {
