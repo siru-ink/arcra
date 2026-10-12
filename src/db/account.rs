@@ -113,7 +113,7 @@ impl Db {
              FROM accounts a
              JOIN currencies c on a.currency = c.id
              WHERE a.id = ?",
-            id.0
+            i64::from(id)
         )
         .fetch_optional(conn)
         .await?;
@@ -145,7 +145,7 @@ impl Db {
         conn: &mut SqliteConnection,
         id: domain::AccountID,
     ) -> Result<(), DeleteAccountError> {
-        let _ = sqlx::query!("DELETE FROM accounts WHERE id = ?", id.0)
+        let _ = sqlx::query!("DELETE FROM accounts WHERE id = ?", i64::from(id))
             .execute(conn)
             .await?;
 
