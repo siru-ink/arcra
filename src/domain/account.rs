@@ -1,5 +1,13 @@
 use crate::domain;
 
+#[derive(Debug, thiserror::Error)]
+pub enum HydrateAccountError {
+    #[error("The provided id must be non-negative, non-zero.")]
+    InvalidId,
+    #[error("The provided name must not be empty.")]
+    InvalidName,
+}
+
 pub struct AccountID(i64);
 
 pub struct NewAccount {
@@ -37,7 +45,19 @@ impl Account {
         currency: domain::Currency,
         balance: i64,
         account_type: domain::AccountType,
-    ) -> Self {
-        todo!()
+    ) -> Result<Self, HydrateAccountError> {
+        if id <= 0 {
+            return Err(HydrateAccountError::InvalidId);
+        } else if name.is_empty() {
+            return Err(HydrateAccountError::InvalidName);
+        }
+
+        Ok(Self {
+            id,
+            name,
+            currency,
+            balance,
+            account_type,
+        })
     }
 }
