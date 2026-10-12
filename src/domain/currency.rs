@@ -50,6 +50,21 @@ impl Currency {
         descriptor: String,
         symbol: String,
     ) -> Result<Self, HydrateCurrencyError> {
-        todo!()
+        if id <= 0 {
+            return Err(HydrateCurrencyError::InvalidId);
+        } else if name.is_empty() {
+            return Err(HydrateCurrencyError::InvalidName);
+        } else if descriptor.is_empty() {
+            return Err(HydrateCurrencyError::InvalidDescriptor);
+        } else if symbol.is_empty() {
+            return Err(HydrateCurrencyError::InvalidSymbol);
+        }
+
+        Ok(Self {
+            id,
+            name,
+            descriptor,
+            symbol,
+        })
     }
 }
