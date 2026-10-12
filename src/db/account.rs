@@ -13,6 +13,8 @@ pub enum CreateAccountError {
 pub enum ReadAccountError {
     #[error("Failure in sqlx database connection.")]
     SqlError(#[from] sqlx::Error),
+    #[error("Could not convert database row into Account domain object.")]
+    HydrateError(#[from] domain::HydrateAccountError),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -25,6 +27,22 @@ pub enum UpdateAccountError {
 pub enum DeleteAccountError {
     #[error("Failure in sqlx database connection.")]
     SqlError(#[from] sqlx::Error),
+}
+
+impl TryFrom<AccountRow> for domain::Account {
+    type Error = domain::HydrateAccountError;
+    fn try_from(value: AccountRow) -> Result<Self, Self::Error> {
+        domain::Account::hydrate(
+            value.id,
+            value.name,
+            value.currency_id,
+            value.currency_name,
+            value.currency_descriptor,
+            value.currency_symbol,
+            value.balance,
+            value.account_type,
+        )
+    }
 }
 
 struct AccountRow {
@@ -90,7 +108,26 @@ impl Db {
         conn: &mut SqliteConnection,
         id: domain::AccountID,
     ) -> Result<Option<domain::Account>, ReadAccountError> {
-        todo!()
+        let account_row = sqlx::query_as!(
+            AccountRow,
+            "SELECT
+                 a.id as id,
+                 a.name as name,
+                 c.id as currency_id,
+                 c.name as currency_name,
+                 c.descriptor as currency_descriptor,
+                 c.symbol as currency_symbol,
+                 a.balance as balance,
+                 a.account_type as account_type
+             FROM accounts a
+             JOIN currencies c on a.currency = c.id
+             WHERE a.id = ?",
+            id.0
+        )
+        .fetch_optional(conn)
+        .await?;
+
+        Ok(account_row.map(domain::Account::try_from).transpose()?)
     }
 
     pub async fn update_account(

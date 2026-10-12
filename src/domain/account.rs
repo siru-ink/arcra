@@ -12,7 +12,7 @@ pub enum HydrateAccountError {
     InvalidAccountType(#[from] domain::HydrateAccountTypeError),
 }
 
-pub struct AccountID(i64);
+pub struct AccountID(pub i64);
 
 pub struct NewAccount {
     name: String,
