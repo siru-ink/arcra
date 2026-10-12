@@ -92,16 +92,7 @@ impl Db {
         .fetch_one(conn)
         .await?;
 
-        Ok(domain::Account::hydrate(
-            new_account.id,
-            new_account.name,
-            new_account.currency_id,
-            new_account.currency_name,
-            new_account.currency_descriptor,
-            new_account.currency_symbol,
-            new_account.balance,
-            new_account.account_type,
-        )?)
+        Ok(new_account.try_into()?)
     }
 
     pub async fn read_account(
