@@ -43,6 +43,18 @@ impl NewAccount {
 }
 
 impl Account {
+    pub fn balance(&self) -> i64 {
+        self.balance
+    }
+
+    pub fn currency_id(&self) -> i64 {
+        self.currency.id()
+    }
+
+    pub fn account_type_id(&self) -> i64 {
+        self.account_type.id()
+    }
+
     pub fn hydrate(
         id: i64,
         name: String,
@@ -75,5 +87,13 @@ impl Account {
             balance,
             account_type,
         })
+    }
+
+    pub fn id(&self) -> i64 {
+        self.id
+    }
+
+    pub fn name(&self) -> &str {
+        &self.name
     }
 }

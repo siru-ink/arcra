@@ -125,7 +125,20 @@ impl Db {
         conn: &mut SqliteConnection,
         account: domain::Account,
     ) -> Result<(), UpdateAccountError> {
-        todo!()
+        let _ = sqlx::query!(
+            "UPDATE accounts
+            SET name = ?, currency = ?, balance = ?, account_type = ?
+            WHERE id = ?",
+            account.name(),
+            account.currency_id(),
+            account.balance(),
+            account.account_type_id(),
+            account.id()
+        )
+        .execute(conn)
+        .await?;
+
+        OK(())
     }
 
     pub async fn delete_account(
