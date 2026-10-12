@@ -1,7 +1,7 @@
 #[derive(Debug, thiserror::Error)]
 pub enum HydrateCurrencyError {
     #[error("The provided id must be a positive integer.")]
-    InvalidId,
+    InvalidID,
     #[error("The provided name must not be empty.")]
     InvalidName,
     #[error("The provided descriptor must not be empty.")]
@@ -79,7 +79,7 @@ impl Currency {
         symbol: String,
     ) -> Result<Self, HydrateCurrencyError> {
         if id <= 0 {
-            return Err(HydrateCurrencyError::InvalidId);
+            return Err(HydrateCurrencyError::InvalidID);
         } else if name.is_empty() {
             return Err(HydrateCurrencyError::InvalidName);
         } else if descriptor.is_empty() {
