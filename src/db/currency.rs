@@ -80,7 +80,7 @@ impl Db {
         let currency_row = sqlx::query_as!(
             CurrencyRow,
             r#"SELECT * FROM currencies WHERE id = ?"#,
-            id.0
+            i64::from(id)
         )
         .fetch_optional(conn)
         .await?;
@@ -111,7 +111,7 @@ impl Db {
         conn: &mut SqliteConnection,
         id: domain::CurrencyID,
     ) -> Result<(), DeleteCurrencyError> {
-        let _ = sqlx::query!("DELETE FROM currencies WHERE id = ?", id.0)
+        let _ = sqlx::query!("DELETE FROM currencies WHERE id = ?", i64::from(id))
             .execute(conn)
             .await?;
 

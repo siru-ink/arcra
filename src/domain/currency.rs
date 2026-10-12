@@ -10,7 +10,13 @@ pub enum HydrateCurrencyError {
     InvalidSymbol,
 }
 
-pub struct CurrencyID(pub i64);
+#[derive(Debug, thiserror::Error)]
+pub enum CreateCurrencyIDError {
+    #[error("The provided id must be a positive integer.")]
+    InvalidID,
+}
+
+pub struct CurrencyID(i64);
 
 pub struct NewCurrency {
     name: String,
@@ -25,9 +31,25 @@ pub struct Currency {
     symbol: String,
 }
 
+impl From<CurrencyID> for i64 {
+    fn from(value: CurrencyID) -> Self {
+        value.0
+    }
+}
+
 impl From<Currency> for CurrencyID {
     fn from(value: Currency) -> Self {
         Self(value.id)
+    }
+}
+
+impl CurrencyID {
+    pub fn new(value: i64) -> Result<Self, CreateCurrencyIDError> {
+        if value > 0 {
+            Ok(CurrencyID(value))
+        } else {
+            Err(CreateCurrencyIDError::InvalidID)
+        }
     }
 }
 
