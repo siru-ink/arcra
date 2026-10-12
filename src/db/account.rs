@@ -143,8 +143,12 @@ impl Db {
 
     pub async fn delete_account(
         conn: &mut SqliteConnection,
-        account: domain::Account,
+        id: domain::AccountID,
     ) -> Result<(), DeleteAccountError> {
-        todo!()
+        let _ = sqlx::query!("DELETE FROM accounts WHERE id = ?", id.0)
+            .execute(conn)
+            .await?;
+
+        Ok(())
     }
 }
