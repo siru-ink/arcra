@@ -6,5 +6,6 @@ pub use account::{CreateAccountError, DeleteAccountError, ReadAccountError, Upda
 pub use currency::{
     CreateCurrencyError, DeleteCurrencyError, ReadCurrencyError, UpdateCurrencyError,
 };
+pub use session::{CreateSessionError, DeleteSessionError, ReadSessionError};
 
 pub struct Db;
