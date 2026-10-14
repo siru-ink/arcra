@@ -14,6 +14,8 @@ pub enum CreateTransactionError {
 pub enum ReadTransactionError {
     #[error("Failure in sqlx database connection.")]
     SqlxError(#[from] sqlx::Error),
+    #[error("Could not convert database row into Transaction domain object.")]
+    HydrateError(#[from] domain::HydrateTransactionError),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -140,11 +142,48 @@ impl crate::db::Db {
         Ok(new_transaction.try_into()?)
     }
 
-    pub fn read_transaction(
+    pub async fn read_transaction(
         conn: &mut SqliteConnection,
         id: domain::TransactionID,
     ) -> Result<Option<domain::Transaction>, ReadTransactionError> {
-        todo!()
+        let transaction_row = sqlx::query_as!(
+            TransactionRow,
+            r#"SELECT
+                 t.id as id,
+                 t.description as description,
+                 t.time as "time: _",
+                 ca.id as credit_account_id,
+                 ca.name as credit_account_name,
+                 cc.id as credit_account_currency_id,
+                 cc.name as credit_account_currency_name,
+                 cc.descriptor as credit_account_currency_descriptor,
+                 cc.symbol as credit_account_currency_symbol,
+                 ca.balance as credit_account_balance,
+                 ca.account_type as credit_account_account_type,
+                 t.credit_amount as credit_amount,
+                 da.id as debit_account_id,
+                 da.name as debit_account_name,
+                 dc.id as debit_account_currency_id,
+                 dc.name as debit_account_currency_name,
+                 dc.descriptor as debit_account_currency_descriptor,
+                 dc.symbol as debit_account_currency_symbol,
+                 da.balance as debit_account_balance,
+                 da.account_type as debit_account_account_type,
+                 t.debit_amount as debit_amount
+               FROM transactions t
+               JOIN accounts ca on t.credit_account = ca.id
+               JOIN currencies cc on ca.currency = cc.id
+               JOIN accounts da on t.debit_account = da.id
+               JOIN currencies dc on da.currency = dc.id
+               WHERE t.id = ?"#,
+            i64::from(id)
+        )
+        .fetch_optional(conn)
+        .await?;
+
+        Ok(transaction_row
+            .map(domain::Transaction::try_from)
+            .transpose()?)
     }
 
     pub fn update_transaction(

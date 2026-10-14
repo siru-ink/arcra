@@ -24,6 +24,12 @@ pub struct Transaction {
     debit_amount: i64,
 }
 
+impl From<TransactionID> for i64 {
+    fn from(value: TransactionID) -> Self {
+        value.0
+    }
+}
+
 impl From<Transaction> for TransactionID {
     fn from(value: Transaction) -> Self {
         TransactionID(value.id)
