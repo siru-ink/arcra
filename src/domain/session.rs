@@ -29,6 +29,12 @@ impl From<SessionID> for i64 {
     }
 }
 
+impl From<Session> for SessionID {
+    fn from(value: Session) -> Self {
+        SessionID(value.id)
+    }
+}
+
 impl NewSession {
     pub fn new() -> Self {
         NewSession {

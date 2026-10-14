@@ -14,7 +14,7 @@ pub enum ReadSessionError {
     #[error("Failure in sqlx database connection.")]
     SqlError(#[from] sqlx::Error),
     #[error("Could not convert database row into domain object.")]
-    HydrateError,
+    HydrateError(#[from] domain::HydrateSessionError),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -65,8 +65,16 @@ impl Db {
     pub async fn read_session(
         conn: &mut SqliteConnection,
         id: domain::SessionID,
-    ) -> Result<(), ReadSessionError> {
-        todo!()
+    ) -> Result<Option<domain::Session>, ReadSessionError> {
+        let session_row = sqlx::query_as!(
+            SessionRow,
+            r#"SELECT id, valid_until as "valid_until: _" FROM sessions WHERE id = ?"#,
+            i64::from(id)
+        )
+        .fetch_optional(conn)
+        .await?;
+
+        Ok(session_row.map(domain::Session::try_from).transpose()?)
     }
 
     pub async fn delete_session(
