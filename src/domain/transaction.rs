@@ -55,3 +55,31 @@ impl NewTransaction {
         self.time
     }
 }
+
+impl Transaction {
+    pub fn hydrate(
+        id: i64,
+        description: String,
+        time: chrono::DateTime<chrono::Utc>,
+        credit_account_id: i64,
+        credit_account_name: String,
+        credit_account_currency_id: i64,
+        credit_account_currency_name: String,
+        credit_account_currency_descriptor: String,
+        credit_account_currency_symbol: String,
+        credit_account_balance: i64,
+        credit_account_account_type: i64,
+        credit_amount: i64,
+        debit_account_id: i64,
+        debit_account_name: String,
+        debit_account_currency_id: i64,
+        debit_account_currency_name: String,
+        debit_account_currency_descriptor: String,
+        debit_account_currency_symbol: String,
+        debit_account_balance: i64,
+        debit_account_account_type: i64,
+        debit_amount: i64,
+    ) -> Result<Self, HydrateTransactionError> {
+        todo!()
+    }
+}
