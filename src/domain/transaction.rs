@@ -1,7 +1,16 @@
 use crate::domain;
 
 #[derive(Debug, thiserror::Error)]
-pub enum HydrateTransactionError {}
+pub enum HydrateTransactionError {
+    #[error("The provided id msut be a positive integer.")]
+    InvalidID,
+    #[error("The description must not be empty.")]
+    EmptyDescription,
+    #[error("Failed to hydrate contained credit account reference.")]
+    InvalidCreditAccount(domain::HydrateAccountError),
+    #[error("Failed to hydrate contained debit account reference.")]
+    InvalidDebitAccount(domain::HydrateAccountError),
+}
 
 pub struct TransactionID(i64);
 
@@ -106,7 +115,45 @@ impl Transaction {
         debit_account_account_type: i64,
         debit_amount: i64,
     ) -> Result<Self, HydrateTransactionError> {
-        todo!()
+        if id <= 0 {
+            return Err(HydrateTransactionError::InvalidID);
+        } else if description.is_empty() {
+            return Err(HydrateTransactionError::EmptyDescription);
+        }
+
+        let credit_account = domain::Account::hydrate(
+            credit_account_id,
+            credit_account_name,
+            credit_account_currency_id,
+            credit_account_currency_name,
+            credit_account_currency_descriptor,
+            credit_account_currency_symbol,
+            credit_account_balance,
+            credit_account_account_type,
+        )
+        .map_err(|e| HydrateTransactionError::InvalidCreditAccount(e))?;
+
+        let debit_account = domain::Account::hydrate(
+            debit_account_id,
+            debit_account_name,
+            debit_account_currency_id,
+            debit_account_currency_name,
+            debit_account_currency_descriptor,
+            debit_account_currency_symbol,
+            debit_account_balance,
+            debit_account_account_type,
+        )
+        .map_err(|e| HydrateTransactionError::InvalidDebitAccount(e))?;
+
+        Ok(Self {
+            id,
+            description,
+            time,
+            credit_account,
+            credit_amount,
+            debit_account,
+            debit_amount,
+        })
     }
 
     pub fn id(&self) -> i64 {
