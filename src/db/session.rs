@@ -81,6 +81,10 @@ impl Db {
         conn: &mut SqliteConnection,
         id: domain::SessionID,
     ) -> Result<(), DeleteSessionError> {
-        todo!()
+        let _ = sqlx::query!("DELETE FROM sessions WHERE id = ?", i64::from(id))
+            .execute(conn)
+            .await?;
+
+        Ok(())
     }
 }
