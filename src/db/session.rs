@@ -14,7 +14,7 @@ pub enum ReadSessionError {
     #[error("Failure in sqlx database connection.")]
     SqlError(#[from] sqlx::Error),
     #[error("Could not convert database row into domain object.")]
-    HydrationError,
+    HydrateError,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -37,7 +37,7 @@ impl TryFrom<SessionRow> for domain::Session {
 }
 
 impl Db {
-    pub async fn create(
+    pub async fn create_session(
         conn: &mut SqliteConnection,
         new_session: domain::NewSession,
     ) -> Result<domain::Session, CreateSessionError> {
@@ -62,14 +62,14 @@ impl Db {
         Ok(domain::Session::try_from(new_session)?)
     }
 
-    pub async fn read(
+    pub async fn read_session(
         conn: &mut SqliteConnection,
         id: domain::SessionID,
     ) -> Result<(), ReadSessionError> {
         todo!()
     }
 
-    pub async fn delete(
+    pub async fn delete_session(
         conn: &mut SqliteConnection,
         id: domain::SessionID,
     ) -> Result<(), DeleteSessionError> {
