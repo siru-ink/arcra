@@ -186,11 +186,32 @@ impl crate::db::Db {
             .transpose()?)
     }
 
-    pub fn update_transaction(
+    pub async fn update_transaction(
         conn: &mut SqliteConnection,
-        id: domain::TransactionID,
+        transaction: domain::Transaction,
     ) -> Result<(), UpdateTransactionError> {
-        todo!()
+        let _ = sqlx::query!(
+            "UPDATE transactions
+             SET
+               description = ?,
+               time = ?,
+               credit_account = ?,
+               credit_amount = ?,
+               debit_account = ?,
+               debit_amount = ?
+             WHERE id = ?",
+            transaction.description(),
+            transaction.time(),
+            transaction.credit_account().id(),
+            transaction.credit_amount(),
+            transaction.debit_account().id(),
+            transaction.debit_amount(),
+            transaction.id()
+        )
+        .execute(conn)
+        .await?;
+
+        Ok(())
     }
 
     pub fn delete_transaction(

@@ -63,6 +63,26 @@ impl NewTransaction {
 }
 
 impl Transaction {
+    pub fn credit_account(&self) -> &domain::Account {
+        &self.credit_account
+    }
+
+    pub fn credit_amount(&self) -> i64 {
+        self.credit_amount
+    }
+
+    pub fn debit_account(&self) -> &domain::Account {
+        &self.debit_account
+    }
+
+    pub fn debit_amount(&self) -> i64 {
+        self.debit_amount
+    }
+
+    pub fn description(&self) -> &str {
+        &self.description
+    }
+
     pub fn hydrate(
         id: i64,
         description: String,
@@ -87,5 +107,13 @@ impl Transaction {
         debit_amount: i64,
     ) -> Result<Self, HydrateTransactionError> {
         todo!()
+    }
+
+    pub fn id(&self) -> i64 {
+        self.id
+    }
+
+    pub fn time(&self) -> chrono::DateTime<chrono::Utc> {
+        self.time
     }
 }
