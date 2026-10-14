@@ -214,10 +214,14 @@ impl crate::db::Db {
         Ok(())
     }
 
-    pub fn delete_transaction(
+    pub async fn delete_transaction(
         conn: &mut SqliteConnection,
         id: domain::TransactionID,
     ) -> Result<(), DeleteTransactionError> {
-        todo!()
+        let _ = sqlx::query!("DELETE FROM transactions WHERE id = ?", i64::from(id))
+            .execute(conn)
+            .await?;
+
+        Ok(())
     }
 }
