@@ -1,12 +1,10 @@
-use crate::db::{
-    Account, AccountRoundedBalanceValues, AccountType, Currency, Transaction,
-    TransactionsRoundedCurrencyValues,
-};
+use crate::domain;
 use axum::{
     http::StatusCode,
     response::{Html, IntoResponse, Response},
 };
 use tera::{Context, Tera};
+
 pub struct ErrorPage {}
 
 impl ErrorPage {
@@ -75,8 +73,11 @@ impl LogoutPage {
 pub struct AccountListPage {}
 
 impl AccountListPage {
-    pub fn show(tera: &Tera, accounts: Vec<Account>, flash: Option<String>) -> Response {
-        let accounts = AccountRoundedBalanceValues::from(accounts);
+    pub fn show(tera: &Tera, accounts: Vec<domain::Account>, flash: Option<String>) -> Response {
+        let accounts = accounts
+            .into_iter()
+            .map(domain::RoundedCurrencyAccount::from)
+            .collect::<Vec<domain::RoundedCurrencyAccount>>();
 
         let mut context = Context::new();
 
@@ -99,8 +100,8 @@ pub struct AccountCreatePage {}
 impl AccountCreatePage {
     pub fn show(
         tera: &Tera,
-        currencies: Vec<Currency>,
-        account_types: Vec<AccountType>,
+        currencies: Vec<domain::Currency>,
+        account_types: Vec<domain::AccountType>,
     ) -> Response {
         let mut context = Context::new();
 
@@ -118,7 +119,7 @@ impl AccountCreatePage {
 pub struct AccountDeletePage {}
 
 impl AccountDeletePage {
-    pub fn show(tera: &Tera, accounts: Vec<Account>) -> Response {
+    pub fn show(tera: &Tera, accounts: Vec<domain::Account>) -> Response {
         let mut context = Context::new();
 
         context.insert("pagenav", &true);
@@ -134,7 +135,7 @@ impl AccountDeletePage {
 pub struct AccountModifyPage {}
 
 impl AccountModifyPage {
-    pub fn show(tera: &Tera, account: Account) -> Response {
+    pub fn show(tera: &Tera, account: domain::Account) -> Response {
         let mut context = Context::new();
 
         context.insert("pagenav", &true);
@@ -150,7 +151,7 @@ impl AccountModifyPage {
 pub struct CurrencyListPage {}
 
 impl CurrencyListPage {
-    pub fn show(tera: &Tera, currencies: Vec<Currency>, flash: Option<String>) -> Response {
+    pub fn show(tera: &Tera, currencies: Vec<domain::Currency>, flash: Option<String>) -> Response {
         let mut context = Context::new();
 
         context.insert("pagenav", &true);
@@ -188,7 +189,7 @@ impl CurrencyCreatePage {
 pub struct CurrencyDeletePage {}
 
 impl CurrencyDeletePage {
-    pub fn show(tera: &Tera, currencies: Vec<Currency>) -> Response {
+    pub fn show(tera: &Tera, currencies: Vec<domain::Currency>) -> Response {
         let mut context = Context::new();
         context.insert("pagenav", &true);
         context.insert("currencies", &currencies);
@@ -205,8 +206,15 @@ impl CurrencyDeletePage {
 pub struct TransactionListPage {}
 
 impl TransactionListPage {
-    pub fn show(tera: &Tera, transactions: Vec<Transaction>, flash: Option<String>) -> Response {
-        let transformed_transactions = TransactionsRoundedCurrencyValues::from(transactions);
+    pub fn show(
+        tera: &Tera,
+        transactions: Vec<domain::Transaction>,
+        flash: Option<String>,
+    ) -> Response {
+        let transformed_transactions = transactions
+            .into_iter()
+            .map(domain::RoundedCurrencyTransaction::from)
+            .collect::<Vec<domain::RoundedCurrencyTransaction>>();
 
         let mut context = Context::new();
 
@@ -233,7 +241,7 @@ impl TransactionListPage {
 pub struct TransactionCreatePage {}
 
 impl TransactionCreatePage {
-    pub fn show(tera: &Tera, accounts: Vec<Account>, flash: Option<String>) -> Response {
+    pub fn show(tera: &Tera, accounts: Vec<domain::Account>, flash: Option<String>) -> Response {
         let mut context = Context::new();
 
         context.insert("pagenav", &true);
@@ -256,7 +264,7 @@ impl TransactionCreatePage {
 pub struct TransactionDeletePage {}
 
 impl TransactionDeletePage {
-    pub fn show(tera: &Tera, transaction: Vec<TransactionsRoundedCurrencyValues>) -> Response {
+    pub fn show(tera: &Tera, transaction: Vec<domain::RoundedCurrencyTransaction>) -> Response {
         let mut context = Context::new();
 
         context.insert("pagenav", &true);

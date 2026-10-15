@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 use crate::domain;
 
 #[derive(Debug, thiserror::Error)]
@@ -33,6 +35,17 @@ pub struct Transaction {
     debit_amount: i64,
 }
 
+#[derive(Serialize)]
+pub struct RoundedCurrencyTransaction {
+    id: i64,
+    description: String,
+    time: chrono::DateTime<chrono::Utc>,
+    credit_account: domain::Account,
+    credit_amount: f64,
+    debit_account: domain::Account,
+    debit_amount: f64,
+}
+
 impl From<TransactionID> for i64 {
     fn from(value: TransactionID) -> Self {
         value.0
@@ -42,6 +55,20 @@ impl From<TransactionID> for i64 {
 impl From<Transaction> for TransactionID {
     fn from(value: Transaction) -> Self {
         TransactionID(value.id)
+    }
+}
+
+impl From<Transaction> for RoundedCurrencyTransaction {
+    fn from(value: Transaction) -> Self {
+        Self {
+            id: value.id,
+            description: value.description,
+            time: value.time,
+            credit_account: value.credit_account,
+            credit_amount: value.credit_amount as f64 / 100.0,
+            debit_account: value.debit_account,
+            debit_amount: value.debit_amount as f64 / 100.0,
+        }
     }
 }
 

@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 use crate::domain;
 
 #[derive(Debug, thiserror::Error)]
@@ -26,6 +28,7 @@ pub struct NewAccount {
     account_type: domain::AccountType,
 }
 
+#[derive(Serialize)]
 pub struct Account {
     id: i64,
     name: String,
@@ -34,9 +37,30 @@ pub struct Account {
     account_type: domain::AccountType,
 }
 
+#[derive(Serialize)]
+pub struct RoundedCurrencyAccount {
+    id: i64,
+    name: String,
+    currency: domain::Currency,
+    balance: f64,
+    account_type: domain::AccountType,
+}
+
 impl From<AccountID> for i64 {
     fn from(value: AccountID) -> Self {
         value.0
+    }
+}
+
+impl From<Account> for RoundedCurrencyAccount {
+    fn from(value: Account) -> Self {
+        RoundedCurrencyAccount {
+            id: value.id,
+            name: value.name,
+            currency: value.currency,
+            balance: value.balance as f64 / 100.0,
+            account_type: value.account_type,
+        }
     }
 }
 

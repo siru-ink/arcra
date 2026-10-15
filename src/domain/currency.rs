@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 #[derive(Debug, thiserror::Error)]
 pub enum HydrateCurrencyError {
     #[error("The provided id must be a positive integer.")]
@@ -24,6 +26,7 @@ pub struct NewCurrency {
     symbol: String,
 }
 
+#[derive(Serialize)]
 pub struct Currency {
     id: i64,
     name: String,

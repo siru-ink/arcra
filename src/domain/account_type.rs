@@ -1,10 +1,12 @@
+use serde::Serialize;
+
 #[derive(Debug, thiserror::Error)]
 pub enum HydrateAccountTypeError {
     #[error("The provided number was outside the acceptable range. Only 1-5 is accepted.")]
     InvalidId,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Serialize)]
 pub enum AccountType {
     Asset = 1,
     Expense,
