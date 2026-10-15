@@ -151,4 +151,32 @@ impl Db {
 
         Ok(())
     }
+
+    pub async fn read_all_accounts(
+        conn: &mut SqliteConnection,
+    ) -> Result<Vec<domain::Account>, ReadAccountError> {
+        let account_rows = sqlx::query_as!(
+            AccountRow,
+            "SELECT
+                 a.id as id,
+                 a.name as name,
+                 c.id as currency_id,
+                 c.name as currency_name,
+                 c.descriptor as currency_descriptor,
+                 c.symbol as currency_symbol,
+                 a.balance as balance,
+                 a.account_type as account_type
+             FROM accounts a
+             JOIN currencies c on a.currency = c.id"
+        )
+        .fetch_all(conn)
+        .await?;
+
+        let accounts: Vec<domain::Account> = account_rows
+            .into_iter()
+            .map(domain::Account::try_from)
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(accounts)
+    }
 }
