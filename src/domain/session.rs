@@ -1,3 +1,5 @@
+use sqlx::SqliteConnection;
+
 #[derive(Debug, thiserror::Error)]
 pub enum CreateSessionIDError {
     #[error("The provided id must be a positive integer.")]
@@ -35,6 +37,16 @@ impl From<Session> for SessionID {
     }
 }
 
+impl SessionID {
+    pub fn new(id: i64) -> Result<Self, CreateSessionIDError> {
+        if id > 0 {
+            Ok(Self(id))
+        } else {
+            Err(CreateSessionIDError::InvalidID)
+        }
+    }
+}
+
 impl NewSession {
     pub fn new() -> Self {
         NewSession {
@@ -59,5 +71,9 @@ impl Session {
         }
 
         Ok(Self { id, valid_until })
+    }
+
+    pub fn id(&self) -> i64 {
+        self.id
     }
 }

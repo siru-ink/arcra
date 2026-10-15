@@ -1,15 +1,14 @@
-use std::sync::Arc;
-
 use crate::{
     AppState,
     crumble::{Crumble, CrumbleKind},
-    db,
+    domain,
 };
 use axum::{
     extract::{FromRequestParts, State},
     http::{StatusCode, request::Parts},
 };
 use sqlx::SqlitePool;
+use std::sync::Arc;
 
 pub struct Session {
     crumble: Crumble,
@@ -24,17 +23,31 @@ impl Session {
             Err(_) => return false,
         };
 
-        db::Session::exists(&self.pool, id).await
+        let Ok(session_id) = domain::SessionID::new(id) else {
+            return false;
+        };
+
+        let Ok(mut db_connection) = self.pool.acquire().await else {
+            return false;
+        };
+
+        session_id.exists_in_db(&mut db_connection).await
     }
 
     pub async fn set_new(&self) {
-        let session = db::Session::new(&self.pool).await;
-        self.crumble
-            .set(CrumbleKind::Session, session.id().to_string());
+        let Ok(mut db_connection) = self.pool.acquire().await else {
+            return;
+        };
+
+        let Ok(session) = domain::Session::create(&mut db_connection).await else {
+            return;
+        };
+
+        self.crumble.set(CrumbleKind::Session, session.as_string());
     }
 
     pub async fn remove(&self) {
-        db::Session::vacuum(&self.pool).await;
+        // db::Session::vacuum(&self.pool).await;
         self.crumble.del(CrumbleKind::Session);
     }
 }
