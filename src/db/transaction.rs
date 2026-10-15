@@ -224,4 +224,48 @@ impl crate::db::Db {
 
         Ok(())
     }
+
+    pub async fn read_all_transactions(
+        conn: &mut SqliteConnection,
+    ) -> Result<Vec<domain::Transaction>, ReadTransactionError> {
+        let transaction_rows = sqlx::query_as!(
+            TransactionRow,
+            r#"SELECT
+                 t.id as id,
+                 t.description as description,
+                 t.time as "time: _",
+                 ca.id as credit_account_id,
+                 ca.name as credit_account_name,
+                 cc.id as credit_account_currency_id,
+                 cc.name as credit_account_currency_name,
+                 cc.descriptor as credit_account_currency_descriptor,
+                 cc.symbol as credit_account_currency_symbol,
+                 ca.balance as credit_account_balance,
+                 ca.account_type as credit_account_account_type,
+                 t.credit_amount as credit_amount,
+                 da.id as debit_account_id,
+                 da.name as debit_account_name,
+                 dc.id as debit_account_currency_id,
+                 dc.name as debit_account_currency_name,
+                 dc.descriptor as debit_account_currency_descriptor,
+                 dc.symbol as debit_account_currency_symbol,
+                 da.balance as debit_account_balance,
+                 da.account_type as debit_account_account_type,
+                 t.debit_amount as debit_amount
+               FROM transactions t
+               JOIN accounts ca on t.credit_account = ca.id
+               JOIN currencies cc on ca.currency = cc.id
+               JOIN accounts da on t.debit_account = da.id
+               JOIN currencies dc on da.currency = dc.id"#
+        )
+        .fetch_all(conn)
+        .await?;
+
+        let transactions: Vec<domain::Transaction> = transaction_rows
+            .into_iter()
+            .map(domain::Transaction::try_from)
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(transactions)
+    }
 }
