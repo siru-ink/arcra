@@ -117,4 +117,19 @@ impl Db {
 
         Ok(())
     }
+
+    pub async fn read_all_currencies(
+        conn: &mut SqliteConnection,
+    ) -> Result<Vec<domain::Currency>, ReadCurrencyError> {
+        let currency_rows = sqlx::query_as!(CurrencyRow, "SELECT * FROM currencies")
+            .fetch_all(conn)
+            .await?;
+
+        let currencies: Vec<domain::Currency> = currency_rows
+            .into_iter()
+            .map(domain::Currency::try_from)
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(currencies)
+    }
 }
