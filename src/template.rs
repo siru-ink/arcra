@@ -264,11 +264,13 @@ impl TransactionCreatePage {
 pub struct TransactionDeletePage {}
 
 impl TransactionDeletePage {
-    pub fn show(tera: &Tera, transaction: Vec<domain::RoundedCurrencyTransaction>) -> Response {
+    pub fn show(tera: &Tera, transaction: domain::Transaction) -> Response {
+        let transaction = domain::RoundedCurrencyTransaction::from(transaction);
+
         let mut context = Context::new();
 
         context.insert("pagenav", &true);
-        context.insert("transaction", &transaction[0]);
+        context.insert("transaction", &transaction);
 
         match tera.render("transaction_delete.html", &context) {
             Ok(page) => Html(page).into_response(),
