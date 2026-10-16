@@ -77,11 +77,11 @@ impl NewCurrency {
         symbol: String,
     ) -> Result<Self, CreateNewCurrencyError> {
         if name.is_empty() {
-            return Err(CreateCurrencyError::InvalidName);
+            return Err(CreateNewCurrencyError::InvalidName);
         } else if descriptor.is_empty() {
-            return Err(CreateCurrencyError::InvalidDescriptor);
+            return Err(CreateNewCurrencyError::InvalidDescriptor);
         } else if symbol.is_empty() {
-            return Err(CreateCurrencyError::InvalidSymbol);
+            return Err(CreateNewCurrencyError::InvalidSymbol);
         }
 
         Ok(Self {
