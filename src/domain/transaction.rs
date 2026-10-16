@@ -3,6 +3,12 @@ use serde::Serialize;
 use crate::domain;
 
 #[derive(Debug, thiserror::Error)]
+pub enum CreateTransactionIDError {
+    #[error("The provided id must be a positive integer.")]
+    InvalidID,
+}
+
+#[derive(Debug, thiserror::Error)]
 pub enum HydrateTransactionError {
     #[error("The provided id msut be a positive integer.")]
     InvalidID,
@@ -55,6 +61,18 @@ impl From<TransactionID> for i64 {
 impl From<Transaction> for TransactionID {
     fn from(value: Transaction) -> Self {
         TransactionID(value.id)
+    }
+}
+
+impl TryFrom<i64> for TransactionID {
+    type Error = CreateTransactionIDError;
+
+    fn try_from(value: i64) -> Result<Self, Self::Error> {
+        if value > 0 {
+            Ok(Self(value))
+        } else {
+            Err(Self::Error::InvalidID)
+        }
     }
 }
 

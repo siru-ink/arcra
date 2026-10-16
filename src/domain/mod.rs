@@ -15,5 +15,6 @@ pub use currency::{
 };
 pub use session::{HydrateSessionError, NewSession, Session, SessionID};
 pub use transaction::{
-    HydrateTransactionError, NewTransaction, RoundedCurrencyTransaction, Transaction, TransactionID,
+    CreateTransactionIDError, HydrateTransactionError, NewTransaction, RoundedCurrencyTransaction,
+    Transaction, TransactionID,
 };

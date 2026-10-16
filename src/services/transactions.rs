@@ -5,7 +5,10 @@ use sqlx::SqlitePool;
 pub enum CreateNewTransactionError {}
 
 #[derive(Debug, thiserror::Error)]
-pub enum DropTransactionError {}
+pub enum DropTransactionError {
+    #[error("Failed to convert id into TransactionID domain object.")]
+    FailedTransactionIDConversion(#[from] domain::CreateTransactionIDError),
+}
 
 #[derive(Debug, thiserror::Error)]
 pub enum ReadTransactionError {}
@@ -15,6 +18,8 @@ pub enum ListAllTransactionsError {}
 
 impl domain::Transaction {
     pub async fn drop(dbase: &SqlitePool, transaction_id: i64) -> Result<(), DropTransactionError> {
+        let transaction_id = domain::TransactionID::try_from(transaction_id)?;
+
         todo!()
     }
 
