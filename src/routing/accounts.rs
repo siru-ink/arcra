@@ -1,7 +1,7 @@
 use crate::{
     AppState,
     crumble::{Flash, Session},
-    db::{Account, AccountType, Currency},
+    domain,
     template::{AccountCreatePage, AccountDeletePage, AccountListPage, AccountModifyPage},
 };
 use axum::{
@@ -21,18 +21,29 @@ pub async fn get_accounts(
         return Redirect::to("/login").into_response();
     };
 
-    let accounts = Account::list_all(&state.pool).await;
+    let Ok(accounts) = domain::Account::list_all(&state.pool).await else {
+        flash.set("Failed to load all accounts.".to_string());
+        return Redirect::to("/").into_response();
+    };
 
     AccountListPage::show(&state.tera, accounts, flash.message())
 }
 
-pub async fn get_create_account(State(state): State<Arc<AppState>>, session: Session) -> Response {
+pub async fn get_create_account(
+    State(state): State<Arc<AppState>>,
+    flash: Flash,
+    session: Session,
+) -> Response {
     if !session.valid().await {
         return Redirect::to("/login").into_response();
     };
 
-    let currencies = Currency::list_all(&state.pool).await;
-    let account_types = AccountType::list_all(&state.pool).await;
+    let Ok(currencies) = domain::Currency::list_all(&state.pool).await else {
+        flash.set("Failed to load all currencies.".to_string());
+        return Redirect::to("/").into_response();
+    };
+
+    let account_types = domain::AccountType::list_all();
 
     AccountCreatePage::show(&state.tera, currencies, account_types)
 }
@@ -49,13 +60,26 @@ pub async fn post_create_account(
     flash: Flash,
     form: Form<AccountCreateForm>,
 ) -> Response {
-    Account::new(&state.pool, &form.name, form.currency, form.account_type).await;
+    if let Err(_) = domain::Account::new(
+        &state.pool,
+        form.name.clone(),
+        form.currency,
+        form.account_type,
+    )
+    .await
+    {
+        flash.set("Failed to create new account.".to_string());
+        return Redirect::to("/").into_response();
+    }
     flash.set("New account created.".to_string());
     Redirect::to("/").into_response()
 }
 
-pub async fn get_delete_account(State(state): State<Arc<AppState>>) -> Response {
-    let accounts = Account::list_all(&state.pool).await;
+pub async fn get_delete_account(State(state): State<Arc<AppState>>, flash: Flash) -> Response {
+    let Ok(accounts) = domain::Account::list_all(&state.pool).await else {
+        flash.set("Failed to load all accounts.".to_string());
+        return Redirect::to("/").into_response();
+    };
     AccountDeletePage::show(&state.tera, accounts)
 }
 
@@ -74,12 +98,11 @@ pub async fn post_delete_account(
         return Redirect::to("/accounts/delete").into_response();
     }
 
-    Account::drop_all(&state.pool, &form.ids).await;
-    if form.ids.len() > 1 {
-        flash.set("Accounts were deleted.".to_string());
+    if let Err(_) = domain::Account::drop_multiple(&state.pool, &form.ids).await {
+        flash.set("Failed to delete some account(s).".to_string());
     } else {
-        flash.set("Account deleted.".to_string());
-    }
+        flash.set("Account(s) were deleted.".to_string());
+    };
     Redirect::to("/accounts/list").into_response()
 }
 
@@ -99,12 +122,9 @@ pub async fn get_modify_account(
         }
     };
 
-    let account = match Account::get(&state.pool, account_id).await {
-        Some(account) => account,
-        None => {
-            flash.set("No account could be found with the provided id. Please select one of the accounts below.".to_string());
-            return Redirect::to("/accounts/list").into_response();
-        }
+    let Ok(account) = domain::Account::get_by_id(&state.pool, account_id).await else {
+        flash.set("No account could be retrieved for the given id.".to_string());
+        return Redirect::to("/accounts/list").into_response();
     };
 
     AccountModifyPage::show(&state.tera, account)
@@ -121,12 +141,11 @@ pub async fn post_modify_account(
     flash: Flash,
     form: Form<AccountModifyForm>,
 ) -> Response {
-    let account = match Account::get(&state.pool, form.account_id).await {
-        Some(account) => account,
-        None => return Redirect::to("/accounts/list").into_response(),
+    let Ok(account) = domain::Account::get_by_id(&state.pool, form.account_id).await else {
+        return Redirect::to("/accounts/list").into_response();
     };
 
-    account.rename(&state.pool, &form.name).await;
+    let _account = account.rename(&state.pool, form.name.clone()).await;
 
     flash.set("Account renamed successfully.".to_string());
     Redirect::to("/accounts/list").into_response()
