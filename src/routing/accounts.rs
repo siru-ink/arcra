@@ -141,12 +141,9 @@ pub async fn post_modify_account(
     flash: Flash,
     form: Form<AccountModifyForm>,
 ) -> Response {
-    let Ok(account) = domain::Account::get_by_id(&state.pool, form.account_id).await else {
-        return Redirect::to("/accounts/list").into_response();
+    match domain::Account::rename(&state.pool, form.account_id, form.name.clone()).await {
+        Ok(_) => flash.set("Account renamed successfully.".to_string()),
+        Err(_) => flash.set("Could not rename account.".to_string()),
     };
-
-    let _account = account.rename(&state.pool, form.name.clone()).await;
-
-    flash.set("Account renamed successfully.".to_string());
     Redirect::to("/accounts/list").into_response()
 }

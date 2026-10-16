@@ -3,6 +3,9 @@ use serde::Serialize;
 use crate::domain;
 
 #[derive(Debug, thiserror::Error)]
+pub enum CreateNewAccountError {}
+
+#[derive(Debug, thiserror::Error)]
 pub enum HydrateAccountError {
     #[error("The provided id must be non-negative, non-zero.")]
     InvalidID,
@@ -64,6 +67,18 @@ impl From<Account> for RoundedCurrencyAccount {
     }
 }
 
+impl TryFrom<&i64> for AccountID {
+    type Error = CreateAccountIDError;
+
+    fn try_from(value: &i64) -> Result<Self, Self::Error> {
+        if *value > 0 {
+            Ok(AccountID(*value))
+        } else {
+            Err(CreateAccountIDError::InvalidID)
+        }
+    }
+}
+
 impl AccountID {
     pub fn new(value: i64) -> Result<Self, CreateAccountIDError> {
         if value > 0 {
@@ -77,6 +92,14 @@ impl AccountID {
 impl NewAccount {
     pub fn name(&self) -> &str {
         &self.name
+    }
+
+    pub fn new(
+        name: String,
+        currency: domain::Currency,
+        account_type: domain::AccountType,
+    ) -> Result<Self, CreateNewAccountError> {
+        todo!()
     }
 
     pub fn currency(&self) -> &domain::Currency {
@@ -141,5 +164,15 @@ impl Account {
 
     pub fn name(&self) -> &str {
         &self.name
+    }
+
+    pub fn set_name(self, new_name: String) -> Self {
+        Self {
+            id: self.id,
+            name: new_name,
+            currency: self.currency,
+            balance: self.balance,
+            account_type: self.account_type,
+        }
     }
 }

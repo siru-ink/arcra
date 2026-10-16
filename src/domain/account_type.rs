@@ -30,4 +30,14 @@ impl AccountType {
             _ => Err(HydrateAccountTypeError::InvalidId),
         }
     }
+
+    pub fn list_all() -> Vec<AccountType> {
+        vec![
+            AccountType::Asset,
+            AccountType::Expense,
+            AccountType::Equity,
+            AccountType::Liability,
+            AccountType::Revenue,
+        ]
+    }
 }

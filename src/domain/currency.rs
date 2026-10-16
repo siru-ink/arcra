@@ -56,7 +56,20 @@ impl From<Currency> for CurrencyID {
     }
 }
 
+impl TryFrom<i64> for CurrencyID {
+    type Error = CreateCurrencyIDError;
+
+    fn try_from(value: i64) -> Result<Self, Self::Error> {
+        if value > 0 {
+            Ok(Self(value))
+        } else {
+            Err(CreateCurrencyIDError::InvalidID)
+        }
+    }
+}
+
 impl CurrencyID {
+    // todo remove this
     pub fn new(value: i64) -> Result<Self, CreateCurrencyIDError> {
         if value > 0 {
             Ok(CurrencyID(value))
