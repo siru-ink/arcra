@@ -1,6 +1,16 @@
 use serde::Serialize;
 
 #[derive(Debug, thiserror::Error)]
+pub enum CreateNewCurrencyError {
+    #[error("The provided name must not be empty.")]
+    InvalidName,
+    #[error("The provided descriptor must not be empty.")]
+    InvalidDescriptor,
+    #[error("The provided symbol must not be empty.")]
+    InvalidSymbol,
+}
+
+#[derive(Debug, thiserror::Error)]
 pub enum HydrateCurrencyError {
     #[error("The provided id must be a positive integer.")]
     InvalidID,
@@ -59,6 +69,26 @@ impl CurrencyID {
 impl NewCurrency {
     pub fn name(&self) -> &str {
         &self.name
+    }
+
+    pub fn new(
+        name: String,
+        descriptor: String,
+        symbol: String,
+    ) -> Result<Self, CreateNewCurrencyError> {
+        if name.is_empty() {
+            return Err(CreateCurrencyError::InvalidName);
+        } else if descriptor.is_empty() {
+            return Err(CreateCurrencyError::InvalidDescriptor);
+        } else if symbol.is_empty() {
+            return Err(CreateCurrencyError::InvalidSymbol);
+        }
+
+        Ok(Self {
+            name,
+            descriptor,
+            symbol,
+        })
     }
 
     pub fn descriptor(&self) -> &str {
