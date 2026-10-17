@@ -49,10 +49,6 @@ impl domain::Session {
         let session = db::Db::create_session(conn, new_session).await?;
         Ok(session)
     }
-
-    pub fn as_string(&self) -> String {
-        self.id().to_string()
-    }
 }
 
 impl services::Butler {
