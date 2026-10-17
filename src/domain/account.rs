@@ -3,7 +3,10 @@ use serde::Serialize;
 use crate::domain;
 
 #[derive(Debug, thiserror::Error)]
-pub enum CreateNewAccountError {}
+pub enum CreateNewAccountError {
+    #[error("Name must not be empty.")]
+    InvalidName,
+}
 
 #[derive(Debug, thiserror::Error)]
 pub enum HydrateAccountError {
@@ -116,7 +119,15 @@ impl NewAccount {
         currency: domain::Currency,
         account_type: domain::AccountType,
     ) -> Result<Self, CreateNewAccountError> {
-        todo!()
+        if name.is_empty() {
+            return Err(CreateNewAccountError::InvalidName);
+        }
+
+        Ok(Self {
+            name,
+            currency,
+            account_type,
+        })
     }
 
     pub fn currency(&self) -> &domain::Currency {
