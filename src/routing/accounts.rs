@@ -52,7 +52,7 @@ pub async fn get_create_account(
 pub struct AccountCreateForm {
     name: String,
     currency: i64,
-    account_type: i64,
+    account_type: String,
 }
 
 pub async fn post_create_account(
@@ -60,7 +60,7 @@ pub async fn post_create_account(
     flash: Flash,
     form: Form<AccountCreateForm>,
 ) -> Response {
-    if let Err(_) = domain::Account::new(
+    if let Err(e) = domain::Account::new(
         &state.pool,
         form.name.clone(),
         form.currency,
@@ -68,6 +68,8 @@ pub async fn post_create_account(
     )
     .await
     {
+        #[cfg(debug_assertions)]
+        eprintln!("{:?}", e);
         flash.set("Failed to create new account.".to_string());
         return Redirect::to("/").into_response();
     }

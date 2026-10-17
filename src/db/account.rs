@@ -62,8 +62,8 @@ impl Db {
         account: domain::NewAccount,
     ) -> Result<domain::Account, CreateAccountError> {
         let new_id = sqlx::query!(
-            r#"INSERT INTO accounts (name, currency, account_type)
-               VALUES (?,?,?)
+            r#"INSERT INTO accounts (name, currency, balance, account_type)
+               VALUES (?, ?, 0, ?)
                RETURNING id as "id!""#,
             account.name(),
             account.currency().id(),
