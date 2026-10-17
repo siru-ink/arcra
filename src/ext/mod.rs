@@ -1,5 +1,8 @@
 pub mod crumble;
 
+pub use crumble::flash::Flash;
+pub use crumble::session::Session;
+
 impl axum::extract::FromRequestParts<std::sync::Arc<crate::AppState>> for crate::services::Butler {
     type Rejection = std::convert::Infallible;
 

@@ -1,6 +1,6 @@
 use crate::{
     AppState,
-    ext::crumble::{Flash, Session},
+    ext::{Flash, Session},
     template::IndexPage,
 };
 use axum::{
