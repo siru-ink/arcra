@@ -25,6 +25,10 @@ pub enum CreateNewTransactionError {
     DBCreateTransactionFailed(#[from] db::CreateTransactionError),
     #[error("Failed to write sql transaction to database.")]
     DBSqlTransactionCommitFailed(sqlx::Error),
+    #[error("Failed to update the balance in the credit account record in the database.")]
+    DBUpdateCreditAccountFailed(db::UpdateAccountError),
+    #[error("Failed to update the balance in the debit account record in the database.")]
+    DBUpdateDebitAccountFailed(db::UpdateAccountError),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -145,6 +149,13 @@ impl domain::Transaction {
             credit_account.update_balance(domain::FlowDirection::Outgoing, actual_credit_amount);
         let debit_account =
             debit_account.update_balance(domain::FlowDirection::Incoming, actual_debit_amount);
+
+        if let Err(e) = db::Db::update_account(&mut conn, credit_account.clone()).await {
+            return Err(CreateNewTransactionError::DBUpdateCreditAccountFailed(e));
+        };
+        if let Err(e) = db::Db::update_account(&mut conn, debit_account.clone()).await {
+            return Err(CreateNewTransactionError::DBUpdateDebitAccountFailed(e));
+        };
 
         let new_transaction = domain::NewTransaction::new(
             description,

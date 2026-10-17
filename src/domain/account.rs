@@ -39,7 +39,7 @@ pub struct NewAccount {
     account_type: domain::AccountType,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct Account {
     id: i64,
     name: String,
