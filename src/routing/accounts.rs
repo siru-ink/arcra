@@ -1,16 +1,16 @@
 use crate::{
-    AppState, domain,
+    domain,
     ext::{Flash, Session},
     services::Butler,
     template::Publisher,
 };
 use axum::{
     Form,
-    extract::{Query, State},
+    extract::Query,
     response::{IntoResponse, Redirect, Response},
 };
 use serde::Deserialize;
-use std::{collections::HashMap, sync::Arc};
+use std::collections::HashMap;
 
 pub async fn get_accounts(
     publisher: Publisher,
@@ -27,12 +27,12 @@ pub async fn get_accounts(
 }
 
 pub async fn get_create_account(
-    State(state): State<Arc<AppState>>,
+    butler: Butler,
     publisher: Publisher,
     flash: Flash,
     _session: Session,
 ) -> Response {
-    let Ok(currencies) = domain::Currency::list_all(&state.pool).await else {
+    let Ok(currencies) = butler.list_all_currencies().await else {
         flash.set("Failed to load all currencies.".to_string());
         return Redirect::to("/").into_response();
     };

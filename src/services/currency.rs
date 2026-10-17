@@ -1,5 +1,4 @@
 use crate::{db, domain};
-use sqlx::SqlitePool;
 
 #[derive(Debug, thiserror::Error)]
 pub enum CreateCurrencyError {
@@ -29,30 +28,30 @@ pub enum ListAllCurrenciesError {
     DBConnectionFailed(#[from] sqlx::Error),
 }
 
-impl domain::Currency {
-    pub async fn create(
-        dbase: &SqlitePool,
+impl crate::services::Butler {
+    pub async fn create_currency(
+        self,
         name: String,
         descriptor: String,
         symbol: String,
     ) -> Result<domain::Currency, CreateCurrencyError> {
         let new_currency = domain::NewCurrency::new(name, descriptor, symbol)?;
-        let mut conn = dbase.acquire().await?;
+        let mut conn = self.dbase.acquire().await?;
         let currency = db::Db::create_currency(&mut conn, new_currency).await?;
         Ok(currency)
     }
 
-    pub async fn drop(dbase: &SqlitePool, id: i64) -> Result<(), DropCurrencyError> {
+    pub async fn drop_currency(self, id: i64) -> Result<(), DropCurrencyError> {
         let currency_id = domain::CurrencyID::new(id)?;
-        let mut conn = dbase.acquire().await?;
+        let mut conn = self.dbase.acquire().await?;
         db::Db::delete_currency(&mut conn, currency_id).await?;
         Ok(())
     }
 
-    pub async fn list_all(
-        db: &SqlitePool,
+    pub async fn list_all_currencies(
+        self,
     ) -> Result<Vec<domain::Currency>, ListAllCurrenciesError> {
-        let mut conn = db.acquire().await?;
+        let mut conn = self.dbase.acquire().await?;
         let currencies = db::Db::read_all_currencies(&mut conn).await?;
         Ok(currencies)
     }
