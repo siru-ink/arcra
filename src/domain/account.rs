@@ -194,8 +194,38 @@ impl Account {
         &self.name
     }
 
-    pub fn update_balance(self, dir: FlowDirection, delta_balance: i64) -> Self {
-        todo!()
+    pub fn update_balance(mut self, dir: FlowDirection, amount: i64) -> Self {
+        let _ = match (self.account_type, dir) {
+            (
+                domain::AccountType::Asset | domain::AccountType::Expense,
+                FlowDirection::Outgoing,
+            )
+            | (
+                domain::AccountType::Equity
+                | domain::AccountType::Liability
+                | domain::AccountType::Revenue,
+                FlowDirection::Incoming,
+            ) => self.balance -= amount,
+            _ => self.balance += amount,
+        };
+        self
+        // credit_account (outgoing) money being taken out
+        //   asset     decrease
+        //   equity    increase
+        //   liability increase
+        //   revenue   increase
+        //   expense   decrease
+
+        // debit_account (incoming) money being paid in
+        //   asset      increase
+        //   equity     decrease
+        //   liability  decrease
+        //   revenue    decrease
+        //   expense    increase
+    }
+
+    pub fn reverse_update_balance(self, dir: FlowDirection, amount: i64) -> Self {
+        self.update_balance(dir, -amount)
     }
 
     pub fn set_name(self, new_name: String) -> Self {
