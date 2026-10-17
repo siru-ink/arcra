@@ -62,7 +62,7 @@ pub async fn post_login(
 
 pub async fn get_logout(
     State(state): State<Arc<AppState>>,
-    session: Session,
+    _session: Session,
     butler: services::Butler,
 ) -> Response {
     if let Err(e) = butler.remove_session_from_client() {

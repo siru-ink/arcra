@@ -22,10 +22,10 @@ pub async fn get_currencies(State(state): State<Arc<AppState>>, flash: Flash) ->
     CurrencyListPage::show(&state.tera, currencies, flash.message())
 }
 
-pub async fn get_create_currency(State(state): State<Arc<AppState>>, session: Session) -> Response {
-    if !session.valid().await {
-        return Redirect::to("/login").into_response();
-    }
+pub async fn get_create_currency(
+    State(state): State<Arc<AppState>>,
+    _session: Session,
+) -> Response {
     CurrencyCreatePage::show(&state.tera)
 }
 
@@ -38,14 +38,10 @@ pub struct CurrencyCreateForm {
 
 pub async fn post_create_currency(
     State(state): State<Arc<AppState>>,
-    session: Session,
+    _session: Session,
     flash: Flash,
     form: Form<CurrencyCreateForm>,
 ) -> Response {
-    if !session.valid().await {
-        return Redirect::to("/login").into_response();
-    }
-
     match domain::Currency::create(
         &state.pool,
         form.name.clone(),
@@ -64,12 +60,8 @@ pub async fn post_create_currency(
 pub async fn get_delete_currency(
     State(state): State<Arc<AppState>>,
     flash: Flash,
-    session: Session,
+    _session: Session,
 ) -> Response {
-    if !session.valid().await {
-        return Redirect::to("/login").into_response();
-    }
-
     let Ok(currencies) = domain::Currency::list_all(&state.pool).await else {
         flash.set("Failed to retrieve data from database.".to_string());
         return Redirect::to("/currencies/list").into_response();
@@ -85,14 +77,10 @@ pub struct CurrencyDeleteForm {
 
 pub async fn post_delete_currency(
     State(state): State<Arc<AppState>>,
-    session: Session,
+    _session: Session,
     flash: Flash,
     form: Form<CurrencyDeleteForm>,
 ) -> Response {
-    if !session.valid().await {
-        return Redirect::to("/login").into_response();
-    }
-
     match domain::Currency::drop(&state.pool, form.id).await {
         Ok(_) => flash.set("Currency deleted successfully.".to_string()),
         Err(_) => flash.set("Currency could not be deleted. Is it maybe still in use?".to_string()),

@@ -14,13 +14,9 @@ use std::{collections::HashMap, sync::Arc};
 
 pub async fn get_list(
     State(state): State<Arc<AppState>>,
-    session: Session,
+    _session: Session,
     flash: Flash,
 ) -> Response {
-    if !session.valid().await {
-        return Redirect::to("/login").into_response();
-    }
-
     let Ok(transactions) = domain::Transaction::list_all(&state.pool).await else {
         flash.set("Could not retrieve list of transactions.".to_string());
         return Redirect::to("/").into_response();
@@ -50,13 +46,9 @@ pub struct TransactionCreateForm {
 pub async fn post_create(
     State(state): State<Arc<AppState>>,
     flash: Flash,
-    session: Session,
+    _session: Session,
     form: Form<TransactionCreateForm>,
 ) -> Response {
-    if !session.valid().await {
-        return Redirect::to("/login").into_response();
-    }
-
     match domain::Transaction::new(
         &state.pool,
         form.description.clone(),
@@ -76,13 +68,9 @@ pub async fn post_create(
 
 pub async fn get_delete(
     State(state): State<Arc<AppState>>,
-    session: Session,
+    _session: Session,
     Query(params): Query<HashMap<String, String>>,
 ) -> Response {
-    if !session.valid().await {
-        return Redirect::to("/login").into_response();
-    }
-
     let raw_transaction_id = match params.get("transaction_id") {
         Some(id) => id,
         None => return Redirect::to("/transactions/list").into_response(),

@@ -14,13 +14,9 @@ use std::{collections::HashMap, sync::Arc};
 
 pub async fn get_accounts(
     State(state): State<Arc<AppState>>,
-    session: Session,
+    _session: Session,
     flash: Flash,
 ) -> Response {
-    if !session.valid().await {
-        return Redirect::to("/login").into_response();
-    };
-
     let Ok(accounts) = domain::Account::list_all(&state.pool).await else {
         flash.set("Failed to load all accounts.".to_string());
         return Redirect::to("/").into_response();
@@ -32,12 +28,8 @@ pub async fn get_accounts(
 pub async fn get_create_account(
     State(state): State<Arc<AppState>>,
     flash: Flash,
-    session: Session,
+    _session: Session,
 ) -> Response {
-    if !session.valid().await {
-        return Redirect::to("/login").into_response();
-    };
-
     let Ok(currencies) = domain::Currency::list_all(&state.pool).await else {
         flash.set("Failed to load all currencies.".to_string());
         return Redirect::to("/").into_response();

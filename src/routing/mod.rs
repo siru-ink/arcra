@@ -6,7 +6,7 @@ use crate::{
 use axum::{
     Router,
     extract::State,
-    response::{IntoResponse, Redirect, Response},
+    response::{IntoResponse, Response},
     routing,
 };
 use std::sync::Arc;
@@ -58,11 +58,12 @@ pub fn get() -> Router<Arc<AppState>> {
         )
 }
 
-async fn get_index(State(state): State<Arc<AppState>>, flash: Flash, session: Session) -> Response {
-    match session.valid().await {
-        true => IndexPage::show(&state.tera, flash.message()),
-        false => Redirect::to("/login").into_response(),
-    }
+async fn get_index(
+    State(state): State<Arc<AppState>>,
+    flash: Flash,
+    _session: Session,
+) -> Response {
+    IndexPage::show(&state.tera, flash.message())
 }
 
 async fn get_healthcheck() -> Response {
