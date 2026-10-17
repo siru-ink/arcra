@@ -81,9 +81,9 @@ impl domain::Transaction {
             transaction.into_parts();
 
         let credit_account =
-            credit_account.reverse_update_balance(domain::FlowDirection::Incoming, credit_amount);
+            credit_account.reverse_update_balance(domain::FlowDirection::Outgoing, credit_amount);
         let debit_account =
-            debit_account.reverse_update_balance(domain::FlowDirection::Outgoing, debit_amount);
+            debit_account.reverse_update_balance(domain::FlowDirection::Incoming, debit_amount);
 
         db::Db::update_account(&mut conn, credit_account).await?;
         db::Db::update_account(&mut conn, debit_account).await?;
