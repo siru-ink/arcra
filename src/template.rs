@@ -5,6 +5,20 @@ use axum::{
 };
 use tera::{Context, Tera};
 
+pub struct Publisher {
+    tera: Tera,
+}
+
+impl Publisher {
+    pub fn new(tera: tera::Tera) -> Self {
+        Self { tera }
+    }
+
+    pub fn hello_world(self) -> Response {
+        "Hello, world!".into_response()
+    }
+}
+
 pub struct ErrorPage {}
 
 impl ErrorPage {
