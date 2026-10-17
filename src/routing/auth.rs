@@ -63,10 +63,8 @@ pub async fn get_logout(
     publisher: Publisher,
     _session: Session,
     butler: services::Butler,
+    crumble: crate::ext::crumble::Crumble,
 ) -> Response {
-    if let Err(e) = butler.remove_session_from_client() {
-        #[cfg(debug_assertions)]
-        eprintln!("{:?}", e);
-    }
+    butler.remove_session_from_client(crumble);
     publisher.logout_page()
 }

@@ -17,9 +17,6 @@ pub enum GetSessionFromCrumbleError {
 }
 
 #[derive(Debug, thiserror::Error)]
-pub enum RemoveSessionError {}
-
-#[derive(Debug, thiserror::Error)]
 pub enum SaveNewSessionError {
     #[error("Failed to connect to the database.")]
     SqlConnectionFailed(#[from] sqlx::Error),
@@ -46,8 +43,8 @@ impl services::Butler {
         Ok(session)
     }
 
-    pub fn remove_session_from_client(&self) -> Result<(), RemoveSessionError> {
-        todo!()
+    pub fn remove_session_from_client(&self, crumble: crate::ext::crumble::Crumble) {
+        crumble.del(crate::ext::crumble::CrumbleKind::Session);
     }
 
     pub async fn save_new_session(&self) -> Result<(), SaveNewSessionError> {
