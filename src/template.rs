@@ -8,8 +8,11 @@ use tera::{Context, Tera};
 pub struct ErrorPage {}
 
 impl ErrorPage {
-    pub fn show(tera: &Tera, error_message: &str) -> Response {
-        eprintln!("Template rendering errored: {}", error_message);
+    pub fn show(tera: &Tera, error_message: &str, original_error: tera::Error) -> Response {
+        eprintln!(
+            "Template rendering errored: {}. {}",
+            error_message, original_error
+        );
         let context = Context::new();
         match tera.render("error.html", &context) {
             Ok(page) => Html(page).into_response(),
@@ -36,7 +39,7 @@ impl IndexPage {
 
         match tera.render("index.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(_) => ErrorPage::show(tera, "Tera failed to render <index.html> template"),
+            Err(e) => ErrorPage::show(tera, "Tera failed to render <index.html> template", e),
         }
     }
 }
@@ -53,7 +56,7 @@ impl LoginPage {
 
         match tera.render("login.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(_) => ErrorPage::show(tera, "Tera failed to render <login.html> template"),
+            Err(e) => ErrorPage::show(tera, "Tera failed to render <login.html> template", e),
         }
     }
 }
@@ -65,7 +68,7 @@ impl LogoutPage {
         let context = Context::new();
         match tera.render("logout.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(_) => ErrorPage::show(tera, "Tera failed to render <logout.html> template"),
+            Err(e) => ErrorPage::show(tera, "Tera failed to render <logout.html> template", e),
         }
     }
 }
@@ -90,7 +93,11 @@ impl AccountListPage {
 
         match tera.render("account_list.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(_) => ErrorPage::show(tera, "Tera failed to render <account_list.html> template"),
+            Err(e) => ErrorPage::show(
+                tera,
+                "Tera failed to render <account_list.html> template",
+                e,
+            ),
         }
     }
 }
@@ -111,7 +118,11 @@ impl AccountCreatePage {
 
         match tera.render("account_create.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(_) => ErrorPage::show(tera, "Tera failed to render <account_create.html> template"),
+            Err(e) => ErrorPage::show(
+                tera,
+                "Tera failed to render <account_create.html> template",
+                e,
+            ),
         }
     }
 }
@@ -127,7 +138,11 @@ impl AccountDeletePage {
 
         match tera.render("account_delete.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(_) => ErrorPage::show(tera, "Tera failed to render <account_delete.html> template"),
+            Err(e) => ErrorPage::show(
+                tera,
+                "Tera failed to render <account_delete.html> template",
+                e,
+            ),
         }
     }
 }
@@ -143,7 +158,11 @@ impl AccountModifyPage {
 
         match tera.render("account_modify.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(_) => ErrorPage::show(tera, "Tera failed to render <account_modify.html> template"),
+            Err(e) => ErrorPage::show(
+                tera,
+                "Tera failed to render <account_modify.html> template",
+                e,
+            ),
         }
     }
 }
@@ -163,7 +182,11 @@ impl CurrencyListPage {
 
         match tera.render("currency_list.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(_) => ErrorPage::show(tera, "Tera failed to render <currency_list.html> template."),
+            Err(e) => ErrorPage::show(
+                tera,
+                "Tera failed to render <currency_list.html> template.",
+                e,
+            ),
         }
     }
 }
@@ -178,9 +201,10 @@ impl CurrencyCreatePage {
 
         match tera.render("currency_create.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(_) => ErrorPage::show(
+            Err(e) => ErrorPage::show(
                 tera,
                 "Tera failed to render <currency_create.html> template.",
+                e,
             ),
         }
     }
@@ -195,9 +219,10 @@ impl CurrencyDeletePage {
         context.insert("currencies", &currencies);
         match tera.render("currency_delete.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(_) => ErrorPage::show(
+            Err(e) => ErrorPage::show(
                 tera,
                 "Tera failed to render <currency_delete.html> template.",
+                e,
             ),
         }
     }
@@ -227,13 +252,11 @@ impl TransactionListPage {
 
         match tera.render("transaction_list.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(e) => {
-                eprintln!("Error: {}", e);
-                ErrorPage::show(
-                    tera,
-                    "Tera failed to render <transaction_list.html> template.",
-                )
-            }
+            Err(e) => ErrorPage::show(
+                tera,
+                "Tera failed to render <transaction_list.html> template.",
+                e,
+            ),
         }
     }
 }
@@ -253,9 +276,10 @@ impl TransactionCreatePage {
 
         match tera.render("transaction_create.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(_) => ErrorPage::show(
+            Err(e) => ErrorPage::show(
                 tera,
                 "Tera failed to render <transaction_create.html> template.",
+                e,
             ),
         }
     }
@@ -274,9 +298,10 @@ impl TransactionDeletePage {
 
         match tera.render("transaction_delete.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(_) => ErrorPage::show(
+            Err(e) => ErrorPage::show(
                 tera,
                 "Tera failed to render <transaction_delete.html> template.",
+                e,
             ),
         }
     }
