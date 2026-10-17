@@ -13,7 +13,7 @@
     <select name="credit_account" id="credit_account" required>
         <option value="" data-currency="..." selected disabled>--Please choose--</option>
         {% for account in accounts %}
-        <option value="{{ account.id }}" data-currency="{{ account.currency }}">{{ account.name }}</option>
+        <option value="{{ account.id }}" data-currency="{{ account.currency.symbol }}">{{ account.name }}</option>
         {% endfor %}
     </select>
     <br />
@@ -25,7 +25,7 @@
     <select name="debit_account" id="debit_account" required>
         <option value="" data-currency="..." selected disabled>--Please choose--</option>
         {% for account in accounts %}
-        <option value="{{ account.id }}" data-currency="{{ account.currency }}">{{ account.name }}</option>
+        <option value="{{ account.id }}" data-currency="{{ account.currency.symbol }}">{{ account.name }}</option>
         {% endfor %}
     </select>
     <br />

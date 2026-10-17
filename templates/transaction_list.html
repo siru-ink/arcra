@@ -9,9 +9,9 @@
     <li>
         ({{ transaction.time | truncate(length=10, end="") }}) <a href="/transactions/delete?transaction_id={{ transaction.id }}">{{ transaction.description }}</a> -
         {{ transaction.credit_account }}
-        {{ transaction.credit_amount | round(method="ceil", precision=2) }}&nbsp;{{ transaction.credit_currency }} -
+        {{ transaction.credit_amount | round(method="ceil", precision=2) }}&nbsp;{{ transaction.credit_currency.symbol }} -
         {{ transaction.debit_account }}
-        {{ transaction.debit_amount | round(method="ceil", precision=2) }}&nbsp;{{ transaction.debit_currency }}
+        {{ transaction.debit_amount | round(method="ceil", precision=2) }}&nbsp;{{ transaction.debit_currency.symbol }}
     </li>
     {% endfor %}
 </ul>
