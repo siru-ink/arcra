@@ -89,13 +89,13 @@ impl Crumble {
     }
 }
 
-impl<S> FromRequestParts<S> for Crumble
-where
-    S: Send + Sync,
-{
+impl FromRequestParts<std::sync::Arc<crate::AppState>> for Crumble {
     type Rejection = (StatusCode, &'static str);
 
-    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+    async fn from_request_parts(
+        parts: &mut Parts,
+        state: &std::sync::Arc<crate::AppState>,
+    ) -> Result<Self, Self::Rejection> {
         match Cookies::from_request_parts(parts, state).await {
             Ok(jar) => Ok(Crumble { jar }),
             Err(_) => Err((

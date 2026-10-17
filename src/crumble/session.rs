@@ -1,14 +1,12 @@
 use crate::{
-    AppState,
     crumble::{Crumble, CrumbleKind},
     domain,
 };
 use axum::{
-    extract::{FromRequestParts, State},
+    extract::FromRequestParts,
     http::{StatusCode, request::Parts},
 };
 use sqlx::SqlitePool;
-use std::sync::Arc;
 
 pub struct Session {
     crumble: Crumble,
@@ -52,29 +50,17 @@ impl Session {
     }
 }
 
-impl FromRequestParts<Arc<AppState>> for Session {
+impl FromRequestParts<std::sync::Arc<crate::AppState>> for Session {
     type Rejection = (StatusCode, &'static str);
 
     async fn from_request_parts(
         parts: &mut Parts,
-        state: &Arc<AppState>,
+        state: &std::sync::Arc<crate::AppState>,
     ) -> Result<Self, Self::Rejection> {
-        let State(appstate): State<Arc<AppState>> = match State::from_request_parts(parts, state)
-            .await
-        {
-            Ok(state) => state,
-            Err(_) => {
-                eprintln!(
-                    "Failed to extract <AppState> from request for <Session::from_request_parts>."
-                );
-                return Err((StatusCode::INTERNAL_SERVER_ERROR, ""));
-            }
-        };
-
         match Crumble::from_request_parts(parts, state).await {
             Ok(crumble) => Ok(Session {
                 crumble,
-                pool: appstate.pool.clone(),
+                pool: state.pool.clone(),
             }),
             Err(e) => Err(e),
         }

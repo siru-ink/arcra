@@ -27,13 +27,13 @@ impl Flash {
     }
 }
 
-impl<S> FromRequestParts<S> for Flash
-where
-    S: Send + Sync,
-{
+impl FromRequestParts<std::sync::Arc<crate::AppState>> for Flash {
     type Rejection = (StatusCode, &'static str);
 
-    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+    async fn from_request_parts(
+        parts: &mut Parts,
+        state: &std::sync::Arc<crate::AppState>,
+    ) -> Result<Self, Self::Rejection> {
         match Crumble::from_request_parts(parts, state).await {
             Ok(crumble) => Ok(Flash { crumble }),
             Err(e) => Err(e),
