@@ -4,19 +4,15 @@ mod session;
 mod transaction;
 
 pub use account::{CreateAccountError, DeleteAccountError, ReadAccountError, UpdateAccountError};
-pub use currency::{
-    CreateCurrencyError, DeleteCurrencyError, ReadCurrencyError, UpdateCurrencyError,
-};
-pub use session::{CreateSessionError, DeleteSessionError, ReadSessionError};
+pub use currency::{CreateCurrencyError, DeleteCurrencyError, ReadCurrencyError};
+pub use session::CreateSessionError;
 use sqlx::{
     SqlitePool,
     migrate::{MigrateError, Migrator},
     sqlite::{SqliteConnectOptions, SqlitePoolOptions},
 };
 use std::{path::Path, str::FromStr, time::Duration};
-pub use transaction::{
-    CreateTransactionError, DeleteTransactionError, ReadTransactionError, UpdateTransactionError,
-};
+pub use transaction::{CreateTransactionError, DeleteTransactionError, ReadTransactionError};
 
 pub struct Db;
 

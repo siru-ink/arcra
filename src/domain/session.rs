@@ -1,5 +1,3 @@
-use sqlx::SqliteConnection;
-
 #[derive(Debug, thiserror::Error)]
 pub enum CreateSessionIDError {
     #[error("The provided id must be a positive integer.")]
@@ -22,7 +20,7 @@ pub struct NewSession {
 
 pub struct Session {
     id: i64,
-    valid_until: chrono::DateTime<chrono::Utc>,
+    _valid_until: chrono::DateTime<chrono::Utc>,
 }
 
 impl From<SessionID> for i64 {
@@ -70,7 +68,10 @@ impl Session {
             return Err(HydrateSessionError::InvalidValidUntil);
         }
 
-        Ok(Self { id, valid_until })
+        Ok(Self {
+            id,
+            _valid_until: valid_until,
+        })
     }
 
     pub fn id(&self) -> i64 {

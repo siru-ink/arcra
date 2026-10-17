@@ -17,11 +17,11 @@ pub enum ReadSessionError {
     HydrateError(#[from] domain::HydrateSessionError),
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum DeleteSessionError {
-    #[error("Failure in sqlx database connection.")]
-    SqlError(#[from] sqlx::Error),
-}
+// #[derive(Debug, thiserror::Error)]
+// pub enum DeleteSessionError {
+//     #[error("Failure in sqlx database connection.")]
+//     SqlError(#[from] sqlx::Error),
+// }
 
 pub struct SessionRow {
     id: i64,
@@ -77,14 +77,14 @@ impl Db {
         Ok(session_row.map(domain::Session::try_from).transpose()?)
     }
 
-    pub async fn delete_session(
-        conn: &mut SqliteConnection,
-        id: domain::SessionID,
-    ) -> Result<(), DeleteSessionError> {
-        let _ = sqlx::query!("DELETE FROM sessions WHERE id = ?", i64::from(id))
-            .execute(conn)
-            .await?;
-
-        Ok(())
-    }
+    //     pub async fn delete_session(
+    //         conn: &mut SqliteConnection,
+    //         id: domain::SessionID,
+    //     ) -> Result<(), DeleteSessionError> {
+    //         let _ = sqlx::query!("DELETE FROM sessions WHERE id = ?", i64::from(id))
+    //             .execute(conn)
+    //             .await?;
+    //
+    //         Ok(())
+    //     }
 }

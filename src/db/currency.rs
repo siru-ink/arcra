@@ -18,11 +18,11 @@ pub enum ReadCurrencyError {
     HydrateError(#[from] domain::HydrateCurrencyError),
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum UpdateCurrencyError {
-    #[error("Failure in sqlx database connection.")]
-    SqlError(#[from] sqlx::Error),
-}
+// #[derive(Debug, thiserror::Error)]
+// pub enum UpdateCurrencyError {
+//     #[error("Failure in sqlx database connection.")]
+//     SqlError(#[from] sqlx::Error),
+// }
 
 #[derive(Debug, thiserror::Error)]
 pub enum DeleteCurrencyError {
@@ -88,24 +88,24 @@ impl Db {
         Ok(currency_row.map(domain::Currency::try_from).transpose()?)
     }
 
-    pub async fn update_currency(
-        conn: &mut SqliteConnection,
-        currency: domain::Currency,
-    ) -> Result<(), UpdateCurrencyError> {
-        let _ = sqlx::query!(
-            "UPDATE currencies
-             SET name = ?, descriptor = ?, symbol = ?
-             WHERE id = ?",
-            currency.name(),
-            currency.descriptor(),
-            currency.symbol(),
-            currency.id()
-        )
-        .execute(conn)
-        .await?;
-
-        Ok(())
-    }
+    //     pub async fn update_currency(
+    //         conn: &mut SqliteConnection,
+    //         currency: domain::Currency,
+    //     ) -> Result<(), UpdateCurrencyError> {
+    //         let _ = sqlx::query!(
+    //             "UPDATE currencies
+    //              SET name = ?, descriptor = ?, symbol = ?
+    //              WHERE id = ?",
+    //             currency.name(),
+    //             currency.descriptor(),
+    //             currency.symbol(),
+    //             currency.id()
+    //         )
+    //         .execute(conn)
+    //         .await?;
+    //
+    //         Ok(())
+    //     }
 
     pub async fn delete_currency(
         conn: &mut SqliteConnection,
