@@ -1,8 +1,6 @@
-use crate::{crumble::Crumble, domain, services};
+use crate::{crumble::Crumble, services};
 
-pub struct Session {
-    session: domain::Session,
-}
+pub struct Session {}
 
 #[derive(Debug, thiserror::Error)]
 pub enum SessionExtractorError {
@@ -40,11 +38,11 @@ impl axum::extract::FromRequestParts<std::sync::Arc<crate::AppState>> for Sessio
 
         let Ok(butler) = services::Butler::from_request_parts(parts, state).await;
 
-        let session = butler
+        let _session = butler
             .get_session_from_crumble(crumble)
             .await
             .map_err(|_| SessionExtractorError::NoValidSession)?;
 
-        Ok(Self { session })
+        Ok(Self {})
     }
 }
