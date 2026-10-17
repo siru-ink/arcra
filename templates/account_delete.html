@@ -10,8 +10,7 @@
     <label for="{{ account.id }}">
         {{ account.name }} -
         {{ account.account_type }} -
-        {{ account.balance }} -
-        {{ account.currency }}
+        {{ account.balance }}&nbsp;{{ account.currency.name }}
     </label>
     <br>
     {% endfor %}
