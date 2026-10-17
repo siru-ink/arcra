@@ -1,5 +1,4 @@
 use crate::{db, domain};
-use sqlx::SqlitePool;
 
 #[derive(Debug, thiserror::Error)]
 pub enum CreateNewTransactionError {
@@ -69,10 +68,10 @@ pub enum ListAllTransactionsError {
     DBReadFailed(#[from] db::ReadTransactionError),
 }
 
-impl domain::Transaction {
-    pub async fn drop(dbase: &SqlitePool, transaction_id: i64) -> Result<(), DropTransactionError> {
+impl crate::services::Butler {
+    pub async fn drop_transaction(&self, transaction_id: i64) -> Result<(), DropTransactionError> {
         let transaction_id = domain::TransactionID::try_from(transaction_id)?;
-        let mut conn = dbase.begin().await?;
+        let mut conn = self.dbase.begin().await?;
         let Some(transaction) = db::Db::read_transaction(&mut conn, transaction_id).await? else {
             return Err(DropTransactionError::DBTransactionNotFound);
         };
@@ -95,32 +94,34 @@ impl domain::Transaction {
         Ok(())
     }
 
-    pub async fn get_by_id(
-        dbase: &SqlitePool,
+    pub async fn get_transaction_by_id(
+        &self,
         transaction_id: i64,
-    ) -> Result<Self, ReadTransactionError> {
+    ) -> Result<domain::Transaction, ReadTransactionError> {
         let transaction_id = domain::TransactionID::try_from(transaction_id)?;
-        let mut conn = dbase.acquire().await?;
+        let mut conn = self.dbase.acquire().await?;
         let Some(transaction) = db::Db::read_transaction(&mut conn, transaction_id).await? else {
             return Err(ReadTransactionError::DBTransactionNotFound);
         };
         Ok(transaction)
     }
 
-    pub async fn list_all(dbase: &SqlitePool) -> Result<Vec<Self>, ListAllTransactionsError> {
-        let mut conn = dbase.acquire().await?;
+    pub async fn list_all_transactions(
+        &self,
+    ) -> Result<Vec<domain::Transaction>, ListAllTransactionsError> {
+        let mut conn = self.dbase.acquire().await?;
         let transactions = db::Db::read_all_transactions(&mut conn).await?;
         Ok(transactions)
     }
 
-    pub async fn new(
-        dbase: &SqlitePool,
+    pub async fn new_transaction(
+        &self,
         description: String,
         credit_account_id: i64,
         debit_account_id: i64,
         credit_amount: f64,
         debit_amount: Option<f64>,
-    ) -> Result<Self, CreateNewTransactionError> {
+    ) -> Result<domain::Transaction, CreateNewTransactionError> {
         if credit_account_id == debit_account_id {
             return Err(CreateNewTransactionError::AccountsMustDiffer);
         }
@@ -128,7 +129,7 @@ impl domain::Transaction {
             .map_err(CreateNewTransactionError::InvalidCreditAccountID)?;
         let debit_account_id = domain::AccountID::try_from(debit_account_id)
             .map_err(CreateNewTransactionError::InvalidDebitAccountID)?;
-        let mut conn = dbase.begin().await?;
+        let mut conn = self.dbase.begin().await?;
         let Some(credit_account) = db::Db::read_account(&mut conn, credit_account_id)
             .await
             .map_err(CreateNewTransactionError::DBReadCreditAccountFailed)?

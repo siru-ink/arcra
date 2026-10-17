@@ -1,24 +1,23 @@
 use crate::{
-    AppState, domain,
     ext::{Flash, Session},
     services::Butler,
     template::Publisher,
 };
 use axum::{
-    extract::{Query, State},
+    extract::Query,
     response::{IntoResponse, Redirect, Response},
 };
 use axum_extra::extract::Form;
 use serde::Deserialize;
-use std::{collections::HashMap, sync::Arc};
+use std::collections::HashMap;
 
 pub async fn get_list(
-    State(state): State<Arc<AppState>>,
+    butler: Butler,
     publisher: Publisher,
     _session: Session,
     flash: Flash,
 ) -> Response {
-    let Ok(transactions) = domain::Transaction::list_all(&state.pool).await else {
+    let Ok(transactions) = butler.list_all_transactions().await else {
         flash.set("Could not retrieve list of transactions.".to_string());
         return Redirect::to("/").into_response();
     };
@@ -48,20 +47,20 @@ pub struct TransactionCreateForm {
 }
 
 pub async fn post_create(
-    State(state): State<Arc<AppState>>,
+    butler: Butler,
     flash: Flash,
     _session: Session,
     form: Form<TransactionCreateForm>,
 ) -> Response {
-    match domain::Transaction::new(
-        &state.pool,
-        form.description.clone(),
-        form.credit_account,
-        form.debit_account,
-        form.credit_amount,
-        form.debit_amount,
-    )
-    .await
+    match butler
+        .new_transaction(
+            form.description.clone(),
+            form.credit_account,
+            form.debit_account,
+            form.credit_amount,
+            form.debit_amount,
+        )
+        .await
     {
         Ok(_) => flash.set("Transaction saved successfully.".to_string()),
         Err(_) => flash.set("Transaction could not be saved.".to_string()),
@@ -71,7 +70,7 @@ pub async fn post_create(
 }
 
 pub async fn get_delete(
-    State(state): State<Arc<AppState>>,
+    butler: Butler,
     publisher: Publisher,
     _session: Session,
     Query(params): Query<HashMap<String, String>>,
@@ -86,7 +85,7 @@ pub async fn get_delete(
         Err(_) => return Redirect::to("/transactions/list").into_response(),
     };
 
-    let Ok(transaction) = domain::Transaction::get_by_id(&state.pool, transaction_id).await else {
+    let Ok(transaction) = butler.get_transaction_by_id(transaction_id).await else {
         return Redirect::to("/transactions/list").into_response();
     };
     publisher.transaction_delete_page(transaction)
@@ -98,12 +97,12 @@ pub struct TransactionDeleteForm {
 }
 
 pub async fn post_delete(
-    State(state): State<Arc<AppState>>,
+    butler: Butler,
     flash: Flash,
     _session: Session,
     form: Form<TransactionDeleteForm>,
 ) -> Response {
-    if let Err(_) = domain::Transaction::drop(&state.pool, form.id).await {
+    if let Err(_) = butler.drop_transaction(form.id).await {
         flash.set("Transaction could not be deleted. Please try again.".to_string());
     } else {
         flash.set("Transaction deleted successfully.".to_string());
