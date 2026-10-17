@@ -1,5 +1,4 @@
 use crate::{db, domain};
-use sqlx::SqlitePool;
 
 #[derive(Debug, thiserror::Error)]
 pub enum CreateAccountError {
@@ -63,14 +62,14 @@ pub enum RenameAccountError {
     MissingNewName,
 }
 
-impl domain::Account {
-    pub async fn drop_multiple(dbase: &SqlitePool, ids: &Vec<i64>) -> Result<(), DropAccountError> {
+impl crate::services::Butler {
+    pub async fn drop_multiple_accounts(&self, ids: &Vec<i64>) -> Result<(), DropAccountError> {
         let account_ids: Vec<domain::AccountID> = ids
             .into_iter()
             .map(domain::AccountID::try_from)
             .collect::<Result<_, _>>()?;
 
-        let mut conn = dbase.acquire().await?;
+        let mut conn = self.dbase.acquire().await?;
 
         for id in account_ids {
             db::Db::delete_account(&mut conn, id).await?;
@@ -79,12 +78,12 @@ impl domain::Account {
         Ok(())
     }
 
-    pub async fn get_by_id(
-        dbase: &SqlitePool,
+    pub async fn get_account_by_id(
+        &self,
         account_id: i64,
     ) -> Result<domain::Account, ReadAccountError> {
         let account_id = domain::AccountID::try_from(&account_id)?;
-        let mut conn = dbase.acquire().await?;
+        let mut conn = self.dbase.acquire().await?;
         let account = db::Db::read_account(&mut conn, account_id).await?;
         match account {
             Some(account) => Ok(account),
@@ -92,22 +91,20 @@ impl domain::Account {
         }
     }
 
-    pub async fn list_all(
-        dbase: &SqlitePool,
-    ) -> Result<Vec<domain::Account>, ListAllAccountsError> {
-        let mut conn = dbase.acquire().await?;
+    pub async fn list_all_accounts(&self) -> Result<Vec<domain::Account>, ListAllAccountsError> {
+        let mut conn = self.dbase.acquire().await?;
         let accounts = db::Db::read_all_accounts(&mut conn).await?;
         Ok(accounts)
     }
 
-    pub async fn new(
-        dbase: &SqlitePool,
+    pub async fn new_account(
+        &self,
         name: String,
         currency_id: i64,
         account_type_id: &str,
     ) -> Result<domain::Account, CreateAccountError> {
         let currency_id = domain::CurrencyID::try_from(currency_id)?;
-        let mut conn = dbase.acquire().await?;
+        let mut conn = self.dbase.acquire().await?;
         let Some(currency) = db::Db::read_currency(&mut conn, currency_id).await? else {
             return Err(CreateAccountError::NoCurrencyFound);
         };
@@ -117,11 +114,11 @@ impl domain::Account {
         Ok(account)
     }
 
-    pub async fn rename(
-        dbase: &SqlitePool,
+    pub async fn rename_account(
+        &self,
         account_id: i64,
         new_name: String,
-    ) -> Result<Self, RenameAccountError> {
+    ) -> Result<domain::Account, RenameAccountError> {
         if new_name.is_empty() {
             // this should probably be checked inside of set_name fn instead,
             // feels like a waste to go through all that effort though to only
@@ -129,7 +126,7 @@ impl domain::Account {
             return Err(RenameAccountError::MissingNewName);
         }
         let account_id = domain::AccountID::try_from(&account_id)?;
-        let mut conn = dbase.acquire().await?;
+        let mut conn = self.dbase.acquire().await?;
         let Some(account) = db::Db::read_account(&mut conn, account_id).await? else {
             return Err(RenameAccountError::NoAccountFound);
         };

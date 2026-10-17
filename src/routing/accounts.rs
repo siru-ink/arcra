@@ -1,6 +1,7 @@
 use crate::{
     AppState, domain,
     ext::{Flash, Session},
+    services::Butler,
     template::Publisher,
 };
 use axum::{
@@ -12,12 +13,12 @@ use serde::Deserialize;
 use std::{collections::HashMap, sync::Arc};
 
 pub async fn get_accounts(
-    State(state): State<Arc<AppState>>,
     publisher: Publisher,
+    butler: Butler,
     _session: Session,
     flash: Flash,
 ) -> Response {
-    let Ok(accounts) = domain::Account::list_all(&state.pool).await else {
+    let Ok(accounts) = butler.list_all_accounts().await else {
         flash.set("Failed to load all accounts.".to_string());
         return Redirect::to("/").into_response();
     };
@@ -49,18 +50,14 @@ pub struct AccountCreateForm {
 }
 
 pub async fn post_create_account(
-    State(state): State<Arc<AppState>>,
+    butler: Butler,
     flash: Flash,
     _session: Session,
     form: Form<AccountCreateForm>,
 ) -> Response {
-    if let Err(e) = domain::Account::new(
-        &state.pool,
-        form.name.clone(),
-        form.currency,
-        &form.account_type,
-    )
-    .await
+    if let Err(e) = butler
+        .new_account(form.name.clone(), form.currency, &form.account_type)
+        .await
     {
         #[cfg(debug_assertions)]
         eprintln!("{:?}", e);
@@ -72,12 +69,12 @@ pub async fn post_create_account(
 }
 
 pub async fn get_delete_account(
-    State(state): State<Arc<AppState>>,
+    butler: Butler,
     publisher: Publisher,
     _session: Session,
     flash: Flash,
 ) -> Response {
-    let Ok(accounts) = domain::Account::list_all(&state.pool).await else {
+    let Ok(accounts) = butler.list_all_accounts().await else {
         flash.set("Failed to load all accounts.".to_string());
         return Redirect::to("/").into_response();
     };
@@ -91,7 +88,7 @@ pub struct AccountDeleteForm {
 }
 
 pub async fn post_delete_account(
-    State(state): State<Arc<AppState>>,
+    butler: Butler,
     flash: Flash,
     _session: Session,
     form: axum_extra::extract::Form<AccountDeleteForm>,
@@ -100,7 +97,7 @@ pub async fn post_delete_account(
         return Redirect::to("/accounts/delete").into_response();
     }
 
-    if let Err(_) = domain::Account::drop_multiple(&state.pool, &form.ids).await {
+    if let Err(_) = butler.drop_multiple_accounts(&form.ids).await {
         flash.set("Failed to delete some account(s).".to_string());
     } else {
         flash.set("Account(s) were deleted.".to_string());
@@ -109,8 +106,8 @@ pub async fn post_delete_account(
 }
 
 pub async fn get_modify_account(
-    State(state): State<Arc<AppState>>,
     Query(param): Query<HashMap<String, String>>,
+    butler: Butler,
     publisher: Publisher,
     _session: Session,
     flash: Flash,
@@ -126,7 +123,7 @@ pub async fn get_modify_account(
         }
     };
 
-    let Ok(account) = domain::Account::get_by_id(&state.pool, account_id).await else {
+    let Ok(account) = butler.get_account_by_id(account_id).await else {
         flash.set("No account could be retrieved for the given id.".to_string());
         return Redirect::to("/accounts/list").into_response();
     };
@@ -140,12 +137,15 @@ pub struct AccountModifyForm {
 }
 
 pub async fn post_modify_account(
-    State(state): State<Arc<AppState>>,
+    butler: Butler,
     flash: Flash,
     _session: Session,
     form: Form<AccountModifyForm>,
 ) -> Response {
-    match domain::Account::rename(&state.pool, form.account_id, form.name.clone()).await {
+    match butler
+        .rename_account(form.account_id, form.name.clone())
+        .await
+    {
         Ok(_) => flash.set("Account renamed successfully.".to_string()),
         Err(_) => flash.set("Could not rename account.".to_string()),
     };

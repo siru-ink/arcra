@@ -1,6 +1,7 @@
 use crate::{
     AppState, domain,
     ext::{Flash, Session},
+    services::Butler,
     template::Publisher,
 };
 use axum::{
@@ -25,12 +26,12 @@ pub async fn get_list(
 }
 
 pub async fn get_create(
-    State(state): State<Arc<AppState>>,
+    butler: Butler,
     publisher: Publisher,
     _session: Session,
     flash: Flash,
 ) -> Response {
-    let Ok(accounts) = domain::Account::list_all(&state.pool).await else {
+    let Ok(accounts) = butler.list_all_accounts().await else {
         flash.set("Could not retrieve list of accounts.".to_string());
         return Redirect::to("/").into_response();
     };
