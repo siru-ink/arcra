@@ -2,12 +2,6 @@ use crate::{db, domain, services};
 use sqlx::SqliteConnection;
 
 #[derive(Debug, thiserror::Error)]
-pub enum CreateSessionServiceError {
-    #[error("Database failed to be able to create a new session.")]
-    DbCreateSessionError(#[from] db::CreateSessionError),
-}
-
-#[derive(Debug, thiserror::Error)]
 pub enum GetSessionFromCrumbleError {
     #[error("Cookie session data was empty.")]
     SessionCookieEmpty,
@@ -40,14 +34,6 @@ impl domain::SessionID {
             Ok(Some(_)) => true,
             _ => false,
         }
-    }
-}
-
-impl domain::Session {
-    pub async fn create(conn: &mut SqliteConnection) -> Result<Self, CreateSessionServiceError> {
-        let new_session = domain::NewSession::new();
-        let session = db::Db::create_session(conn, new_session).await?;
-        Ok(session)
     }
 }
 
