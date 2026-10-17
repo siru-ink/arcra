@@ -81,6 +81,7 @@ async fn main() {
         .expect("Port 8160 should allow binding a new listener");
 
     serve(listener, router)
+        .with_graceful_shutdown(check_interupt())
         .await
         .expect("Server crashed unexpectedly");
 }
@@ -89,4 +90,28 @@ async fn main() {
 async fn logger(request: Request, next: Next) -> Response {
     println!("Serving {}", request.uri());
     next.run(request).await
+}
+
+async fn check_interupt() {
+    let ctrl_c = async {
+        tokio::signal::ctrl_c()
+            .await
+            .expect("failed to launch ctrl-c handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
 }
