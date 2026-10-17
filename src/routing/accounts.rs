@@ -1,7 +1,7 @@
 use crate::{
     AppState, domain,
     ext::{Flash, Session},
-    template::{AccountCreatePage, AccountDeletePage, AccountListPage, AccountModifyPage},
+    template::Publisher,
 };
 use axum::{
     Form,
@@ -13,6 +13,7 @@ use std::{collections::HashMap, sync::Arc};
 
 pub async fn get_accounts(
     State(state): State<Arc<AppState>>,
+    publisher: Publisher,
     _session: Session,
     flash: Flash,
 ) -> Response {
@@ -21,11 +22,12 @@ pub async fn get_accounts(
         return Redirect::to("/").into_response();
     };
 
-    AccountListPage::show(&state.tera, accounts, flash.message())
+    publisher.account_list_page(accounts, flash.message())
 }
 
 pub async fn get_create_account(
     State(state): State<Arc<AppState>>,
+    publisher: Publisher,
     flash: Flash,
     _session: Session,
 ) -> Response {
@@ -36,7 +38,7 @@ pub async fn get_create_account(
 
     let account_types = domain::AccountType::list_all();
 
-    AccountCreatePage::show(&state.tera, currencies, account_types)
+    publisher.account_create_page(currencies, account_types)
 }
 
 #[derive(Deserialize)]
@@ -71,6 +73,7 @@ pub async fn post_create_account(
 
 pub async fn get_delete_account(
     State(state): State<Arc<AppState>>,
+    publisher: Publisher,
     _session: Session,
     flash: Flash,
 ) -> Response {
@@ -78,7 +81,7 @@ pub async fn get_delete_account(
         flash.set("Failed to load all accounts.".to_string());
         return Redirect::to("/").into_response();
     };
-    AccountDeletePage::show(&state.tera, accounts)
+    publisher.account_delete_page(accounts)
 }
 
 #[derive(Deserialize)]
@@ -108,6 +111,7 @@ pub async fn post_delete_account(
 pub async fn get_modify_account(
     State(state): State<Arc<AppState>>,
     Query(param): Query<HashMap<String, String>>,
+    publisher: Publisher,
     _session: Session,
     flash: Flash,
 ) -> Response {
@@ -126,8 +130,7 @@ pub async fn get_modify_account(
         flash.set("No account could be retrieved for the given id.".to_string());
         return Redirect::to("/accounts/list").into_response();
     };
-
-    AccountModifyPage::show(&state.tera, account)
+    publisher.account_modify_page(account)
 }
 
 #[derive(Deserialize)]

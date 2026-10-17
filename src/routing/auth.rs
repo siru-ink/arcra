@@ -1,19 +1,18 @@
 use crate::{
-    AppState, PASSWORD_HASH, USERNAME,
+    PASSWORD_HASH, USERNAME,
     ext::{Flash, Session},
     services,
-    template::{LoginPage, LogoutPage},
+    template::Publisher,
 };
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use axum::{
-    extract::{Form, State},
+    extract::Form,
     response::{IntoResponse, Redirect, Response},
 };
 use serde::Deserialize;
-use std::sync::Arc;
 
-pub async fn get_login(State(state): State<Arc<AppState>>, flash: Flash) -> Response {
-    LoginPage::show(&state.tera, flash.message())
+pub async fn get_login(publisher: Publisher, flash: Flash) -> Response {
+    publisher.login_page(flash.message())
 }
 
 #[derive(Deserialize)]
@@ -61,7 +60,7 @@ pub async fn post_login(
 }
 
 pub async fn get_logout(
-    State(state): State<Arc<AppState>>,
+    publisher: Publisher,
     _session: Session,
     butler: services::Butler,
 ) -> Response {
@@ -69,5 +68,5 @@ pub async fn get_logout(
         #[cfg(debug_assertions)]
         eprintln!("{:?}", e);
     }
-    LogoutPage::show(&state.tera)
+    publisher.logout_page()
 }

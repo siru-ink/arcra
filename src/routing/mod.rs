@@ -1,11 +1,10 @@
 use crate::{
     AppState,
     ext::{Flash, Session},
-    template::IndexPage,
+    template::Publisher,
 };
 use axum::{
     Router,
-    extract::State,
     response::{IntoResponse, Response},
     routing,
 };
@@ -58,12 +57,8 @@ pub fn get() -> Router<Arc<AppState>> {
         )
 }
 
-async fn get_index(
-    State(state): State<Arc<AppState>>,
-    flash: Flash,
-    _session: Session,
-) -> Response {
-    IndexPage::show(&state.tera, flash.message())
+async fn get_index(publisher: Publisher, flash: Flash, _session: Session) -> Response {
+    publisher.index_page(flash.message())
 }
 
 async fn get_healthcheck() -> Response {

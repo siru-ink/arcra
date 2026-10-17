@@ -10,11 +10,12 @@ use serde::Deserialize;
 use crate::{
     AppState, domain,
     ext::{Flash, Session},
-    template::{CurrencyCreatePage, CurrencyDeletePage, CurrencyListPage},
+    template::Publisher,
 };
 
 pub async fn get_currencies(
     State(state): State<Arc<AppState>>,
+    publisher: Publisher,
     _session: Session,
     flash: Flash,
 ) -> Response {
@@ -22,14 +23,11 @@ pub async fn get_currencies(
         flash.set("Failed to retrieve data from database.".to_string());
         return Redirect::to("/").into_response();
     };
-    CurrencyListPage::show(&state.tera, currencies, flash.message())
+    publisher.currency_list_page(currencies, flash.message())
 }
 
-pub async fn get_create_currency(
-    State(state): State<Arc<AppState>>,
-    _session: Session,
-) -> Response {
-    CurrencyCreatePage::show(&state.tera)
+pub async fn get_create_currency(publisher: Publisher, _session: Session) -> Response {
+    publisher.currency_create_page()
 }
 
 #[derive(Deserialize)]
@@ -62,6 +60,7 @@ pub async fn post_create_currency(
 
 pub async fn get_delete_currency(
     State(state): State<Arc<AppState>>,
+    publisher: Publisher,
     flash: Flash,
     _session: Session,
 ) -> Response {
@@ -69,8 +68,7 @@ pub async fn get_delete_currency(
         flash.set("Failed to retrieve data from database.".to_string());
         return Redirect::to("/currencies/list").into_response();
     };
-
-    CurrencyDeletePage::show(&state.tera, currencies)
+    publisher.currency_delete_page(currencies)
 }
 
 #[derive(Deserialize)]

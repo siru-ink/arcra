@@ -1,44 +1,33 @@
 use crate::domain;
-use axum::{
-    http::StatusCode,
-    response::{Html, IntoResponse, Response},
-};
-use tera::{Context, Tera};
+use axum::response::{Html, IntoResponse, Response};
+use tera::Context;
 
 pub struct Publisher {
-    tera: std::sync::Arc<Tera>,
+    tera: std::sync::Arc<tera::Tera>,
 }
 
 impl Publisher {
     pub fn new(tera: std::sync::Arc<tera::Tera>) -> Self {
         Self { tera }
     }
-}
 
-pub struct ErrorPage {}
-
-impl ErrorPage {
-    pub fn show(tera: &Tera, error_message: &str, original_error: tera::Error) -> Response {
+    pub fn error_page(self, error_message: &str, original_error: tera::Error) -> Response {
         eprintln!(
             "Template rendering errored: {}. {}",
             error_message, original_error
         );
         let context = Context::new();
-        match tera.render("error.html", &context) {
+        match self.tera.render("error.html", &context) {
             Ok(page) => Html(page).into_response(),
             Err(_) => (
-                StatusCode::INTERNAL_SERVER_ERROR,
+                axum::http::StatusCode::INTERNAL_SERVER_ERROR,
                 "Failed to render error.html tera template",
             )
                 .into_response(),
         }
     }
-}
 
-pub struct IndexPage {}
-
-impl IndexPage {
-    pub fn show(tera: &Tera, flash: Option<String>) -> Response {
+    pub fn index_page(self, flash: Option<String>) -> Response {
         let mut context = Context::new();
 
         context.insert("pagenav", &true);
@@ -47,46 +36,38 @@ impl IndexPage {
             context.insert("flash", &message);
         }
 
-        match tera.render("index.html", &context) {
+        match self.tera.render("index.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(e) => ErrorPage::show(tera, "Tera failed to render <index.html> template", e),
+            Err(e) => self.error_page("Tera failed to render <index.html> template", e),
         }
     }
-}
 
-pub struct LoginPage {}
-
-impl LoginPage {
-    pub fn show(tera: &Tera, flash: Option<String>) -> Response {
+    pub fn login_page(self, flash: Option<String>) -> Response {
         let mut context = Context::new();
 
         if let Some(message) = flash {
             context.insert("flash", &message)
         };
 
-        match tera.render("login.html", &context) {
+        match self.tera.render("login.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(e) => ErrorPage::show(tera, "Tera failed to render <login.html> template", e),
+            Err(e) => self.error_page("Tera failed to render <login.html> template", e),
         }
     }
-}
 
-pub struct LogoutPage {}
-
-impl LogoutPage {
-    pub fn show(tera: &Tera) -> Response {
+    pub fn logout_page(self) -> Response {
         let context = Context::new();
-        match tera.render("logout.html", &context) {
+        match self.tera.render("logout.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(e) => ErrorPage::show(tera, "Tera failed to render <logout.html> template", e),
+            Err(e) => self.error_page("Tera failed to render <logout.html> template", e),
         }
     }
-}
 
-pub struct AccountListPage {}
-
-impl AccountListPage {
-    pub fn show(tera: &Tera, accounts: Vec<domain::Account>, flash: Option<String>) -> Response {
+    pub fn account_list_page(
+        self,
+        accounts: Vec<domain::Account>,
+        flash: Option<String>,
+    ) -> Response {
         let accounts = accounts
             .into_iter()
             .map(domain::RoundedCurrencyAccount::from)
@@ -101,22 +82,14 @@ impl AccountListPage {
             context.insert("flash", &message);
         }
 
-        match tera.render("account_list.html", &context) {
+        match self.tera.render("account_list.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(e) => ErrorPage::show(
-                tera,
-                "Tera failed to render <account_list.html> template",
-                e,
-            ),
+            Err(e) => self.error_page("Tera failed to render <account_list.html> template", e),
         }
     }
-}
 
-pub struct AccountCreatePage {}
-
-impl AccountCreatePage {
-    pub fn show(
-        tera: &Tera,
+    pub fn account_create_page(
+        self,
         currencies: Vec<domain::Currency>,
         account_types: Vec<domain::AccountType>,
     ) -> Response {
@@ -126,61 +99,41 @@ impl AccountCreatePage {
         context.insert("currencies", &currencies);
         context.insert("account_types", &account_types);
 
-        match tera.render("account_create.html", &context) {
+        match self.tera.render("account_create.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(e) => ErrorPage::show(
-                tera,
-                "Tera failed to render <account_create.html> template",
-                e,
-            ),
+            Err(e) => self.error_page("Tera failed to render <account_create.html> template", e),
         }
     }
-}
 
-pub struct AccountDeletePage {}
-
-impl AccountDeletePage {
-    pub fn show(tera: &Tera, accounts: Vec<domain::Account>) -> Response {
+    pub fn account_delete_page(self, accounts: Vec<domain::Account>) -> Response {
         let mut context = Context::new();
 
         context.insert("pagenav", &true);
         context.insert("accounts", &accounts);
 
-        match tera.render("account_delete.html", &context) {
+        match self.tera.render("account_delete.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(e) => ErrorPage::show(
-                tera,
-                "Tera failed to render <account_delete.html> template",
-                e,
-            ),
+            Err(e) => self.error_page("Tera failed to render <account_delete.html> template", e),
         }
     }
-}
 
-pub struct AccountModifyPage {}
-
-impl AccountModifyPage {
-    pub fn show(tera: &Tera, account: domain::Account) -> Response {
+    pub fn account_modify_page(self, account: domain::Account) -> Response {
         let mut context = Context::new();
 
         context.insert("pagenav", &true);
         context.insert("account", &account);
 
-        match tera.render("account_modify.html", &context) {
+        match self.tera.render("account_modify.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(e) => ErrorPage::show(
-                tera,
-                "Tera failed to render <account_modify.html> template",
-                e,
-            ),
+            Err(e) => self.error_page("Tera failed to render <account_modify.html> template", e),
         }
     }
-}
 
-pub struct CurrencyListPage {}
-
-impl CurrencyListPage {
-    pub fn show(tera: &Tera, currencies: Vec<domain::Currency>, flash: Option<String>) -> Response {
+    pub fn currency_list_page(
+        self,
+        currencies: Vec<domain::Currency>,
+        flash: Option<String>,
+    ) -> Response {
         let mut context = Context::new();
 
         context.insert("pagenav", &true);
@@ -190,59 +143,35 @@ impl CurrencyListPage {
             context.insert("flash", &message);
         }
 
-        match tera.render("currency_list.html", &context) {
+        match self.tera.render("currency_list.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(e) => ErrorPage::show(
-                tera,
-                "Tera failed to render <currency_list.html> template.",
-                e,
-            ),
+            Err(e) => self.error_page("Tera failed to render <currency_list.html> template.", e),
         }
     }
-}
 
-pub struct CurrencyCreatePage {}
-
-impl CurrencyCreatePage {
-    pub fn show(tera: &Tera) -> Response {
+    pub fn currency_create_page(self) -> Response {
         let mut context = Context::new();
 
         context.insert("pagenav", &true);
 
-        match tera.render("currency_create.html", &context) {
+        match self.tera.render("currency_create.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(e) => ErrorPage::show(
-                tera,
-                "Tera failed to render <currency_create.html> template.",
-                e,
-            ),
+            Err(e) => self.error_page("Tera failed to render <currency_create.html> template.", e),
         }
     }
-}
 
-pub struct CurrencyDeletePage {}
-
-impl CurrencyDeletePage {
-    pub fn show(tera: &Tera, currencies: Vec<domain::Currency>) -> Response {
+    pub fn currency_delete_page(self, currencies: Vec<domain::Currency>) -> Response {
         let mut context = Context::new();
         context.insert("pagenav", &true);
         context.insert("currencies", &currencies);
-        match tera.render("currency_delete.html", &context) {
+        match self.tera.render("currency_delete.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(e) => ErrorPage::show(
-                tera,
-                "Tera failed to render <currency_delete.html> template.",
-                e,
-            ),
+            Err(e) => self.error_page("Tera failed to render <currency_delete.html> template.", e),
         }
     }
-}
 
-pub struct TransactionListPage {}
-
-impl TransactionListPage {
-    pub fn show(
-        tera: &Tera,
+    pub fn transaction_list_page(
+        self,
         transactions: Vec<domain::Transaction>,
         flash: Option<String>,
     ) -> Response {
@@ -260,21 +189,17 @@ impl TransactionListPage {
             context.insert("flash", &message);
         }
 
-        match tera.render("transaction_list.html", &context) {
+        match self.tera.render("transaction_list.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(e) => ErrorPage::show(
-                tera,
-                "Tera failed to render <transaction_list.html> template.",
-                e,
-            ),
+            Err(e) => self.error_page("Tera failed to render <transaction_list.html> template.", e),
         }
     }
-}
 
-pub struct TransactionCreatePage {}
-
-impl TransactionCreatePage {
-    pub fn show(tera: &Tera, accounts: Vec<domain::Account>, flash: Option<String>) -> Response {
+    pub fn transaction_create_page(
+        self,
+        accounts: Vec<domain::Account>,
+        flash: Option<String>,
+    ) -> Response {
         let mut context = Context::new();
 
         context.insert("pagenav", &true);
@@ -284,21 +209,16 @@ impl TransactionCreatePage {
             context.insert("flash", &message);
         }
 
-        match tera.render("transaction_create.html", &context) {
+        match self.tera.render("transaction_create.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(e) => ErrorPage::show(
-                tera,
+            Err(e) => self.error_page(
                 "Tera failed to render <transaction_create.html> template.",
                 e,
             ),
         }
     }
-}
 
-pub struct TransactionDeletePage {}
-
-impl TransactionDeletePage {
-    pub fn show(tera: &Tera, transaction: domain::Transaction) -> Response {
+    pub fn transaction_delete_page(self, transaction: domain::Transaction) -> Response {
         let transaction = domain::RoundedCurrencyTransaction::from(transaction);
 
         let mut context = Context::new();
@@ -306,10 +226,9 @@ impl TransactionDeletePage {
         context.insert("pagenav", &true);
         context.insert("transaction", &transaction);
 
-        match tera.render("transaction_delete.html", &context) {
+        match self.tera.render("transaction_delete.html", &context) {
             Ok(page) => Html(page).into_response(),
-            Err(e) => ErrorPage::show(
-                tera,
+            Err(e) => self.error_page(
                 "Tera failed to render <transaction_delete.html> template.",
                 e,
             ),

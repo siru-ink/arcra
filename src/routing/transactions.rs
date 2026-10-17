@@ -1,7 +1,7 @@
 use crate::{
     AppState, domain,
     ext::{Flash, Session},
-    template::{TransactionCreatePage, TransactionDeletePage, TransactionListPage},
+    template::Publisher,
 };
 use axum::{
     extract::{Query, State},
@@ -13,6 +13,7 @@ use std::{collections::HashMap, sync::Arc};
 
 pub async fn get_list(
     State(state): State<Arc<AppState>>,
+    publisher: Publisher,
     _session: Session,
     flash: Flash,
 ) -> Response {
@@ -20,12 +21,12 @@ pub async fn get_list(
         flash.set("Could not retrieve list of transactions.".to_string());
         return Redirect::to("/").into_response();
     };
-
-    TransactionListPage::show(&state.tera, transactions, flash.message())
+    publisher.transaction_list_page(transactions, flash.message())
 }
 
 pub async fn get_create(
     State(state): State<Arc<AppState>>,
+    publisher: Publisher,
     _session: Session,
     flash: Flash,
 ) -> Response {
@@ -33,8 +34,7 @@ pub async fn get_create(
         flash.set("Could not retrieve list of accounts.".to_string());
         return Redirect::to("/").into_response();
     };
-
-    TransactionCreatePage::show(&state.tera, accounts, flash.message())
+    publisher.transaction_create_page(accounts, flash.message())
 }
 
 #[derive(Deserialize)]
@@ -71,6 +71,7 @@ pub async fn post_create(
 
 pub async fn get_delete(
     State(state): State<Arc<AppState>>,
+    publisher: Publisher,
     _session: Session,
     Query(params): Query<HashMap<String, String>>,
 ) -> Response {
@@ -87,8 +88,7 @@ pub async fn get_delete(
     let Ok(transaction) = domain::Transaction::get_by_id(&state.pool, transaction_id).await else {
         return Redirect::to("/transactions/list").into_response();
     };
-
-    TransactionDeletePage::show(&state.tera, transaction)
+    publisher.transaction_delete_page(transaction)
 }
 
 #[derive(Deserialize)]
