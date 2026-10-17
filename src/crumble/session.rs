@@ -2,15 +2,11 @@ use crate::{
     crumble::{Crumble, CrumbleKind},
     domain,
 };
-use axum::{
-    extract::FromRequestParts,
-    http::{StatusCode, request::Parts},
-};
-use sqlx::SqlitePool;
+use axum::http::{StatusCode, request::Parts};
 
 pub struct Session {
     crumble: Crumble,
-    pool: SqlitePool,
+    pool: sqlx::Pool<sqlx::Sqlite>,
 }
 
 impl Session {
@@ -50,7 +46,7 @@ impl Session {
     }
 }
 
-impl FromRequestParts<std::sync::Arc<crate::AppState>> for Session {
+impl axum::extract::FromRequestParts<std::sync::Arc<crate::AppState>> for Session {
     type Rejection = (StatusCode, &'static str);
 
     async fn from_request_parts(
