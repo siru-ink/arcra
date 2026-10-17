@@ -3,7 +3,14 @@ use serde::Serialize;
 use crate::domain;
 
 #[derive(Debug, thiserror::Error)]
-pub enum CreateNewTransactionError {}
+pub enum CreateNewTransactionError {
+    #[error("Description must not be empty.")]
+    InvalidDescription,
+    #[error("Credit amount must be a positive integer.")]
+    InvalidCreditAmount,
+    #[error("Debit amount must be a positive integer.")]
+    InvalidDebitAmount,
+}
 
 #[derive(Debug, thiserror::Error)]
 pub enum CreateTransactionIDError {
@@ -122,7 +129,22 @@ impl NewTransaction {
         debit_account: domain::Account,
         debit_amount: i64,
     ) -> Result<Self, CreateNewTransactionError> {
-        todo!()
+        if description.is_empty() {
+            return Err(CreateNewTransactionError::InvalidDescription);
+        } else if credit_amount <= 0 {
+            return Err(CreateNewTransactionError::InvalidCreditAmount);
+        } else if debit_amount <= 0 {
+            return Err(CreateNewTransactionError::InvalidDebitAmount);
+        }
+
+        Ok(Self {
+            description,
+            time: chrono::Utc::now(),
+            credit_account,
+            credit_amount,
+            debit_account,
+            debit_amount,
+        })
     }
 
     pub fn time(&self) -> chrono::DateTime<chrono::Utc> {
