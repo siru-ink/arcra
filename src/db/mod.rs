@@ -5,7 +5,7 @@ mod transaction;
 
 pub use account::{CreateAccountError, DeleteAccountError, ReadAccountError, UpdateAccountError};
 pub use currency::{CreateCurrencyError, DeleteCurrencyError, ReadCurrencyError};
-pub use session::CreateSessionError;
+pub use session::{CreateSessionError, ReadSessionError};
 use sqlx::{
     SqlitePool,
     migrate::{MigrateError, Migrator},

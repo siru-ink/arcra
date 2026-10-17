@@ -1,6 +1,7 @@
 use crate::{
     AppState, PASSWORD_HASH, USERNAME,
     crumble::{Flash, Session},
+    services,
     template::{LoginPage, LogoutPage},
 };
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
@@ -21,7 +22,11 @@ pub struct LoginForm {
     password: String,
 }
 
-pub async fn post_login(flash: Flash, session: Session, Form(form): Form<LoginForm>) -> Response {
+pub async fn post_login(
+    flash: Flash,
+    butler: crate::services::Butler,
+    Form(form): Form<LoginForm>,
+) -> Response {
     let global_username = USERNAME
         .get()
         .expect("Global username variable must be accessible during runtime");
@@ -46,12 +51,23 @@ pub async fn post_login(flash: Flash, session: Session, Form(form): Form<LoginFo
         return Redirect::to("/login").into_response();
     }
 
-    session.set_new().await;
+    if let Err(e) = butler.save_new_session().await {
+        #[cfg(debug_assertions)]
+        eprintln!("{:?}", e);
+        flash.set("Could not save session to browser.".to_string());
+    };
 
     Redirect::to("/").into_response()
 }
 
-pub async fn get_logout(State(state): State<Arc<AppState>>, session: Session) -> Response {
-    session.remove().await;
+pub async fn get_logout(
+    State(state): State<Arc<AppState>>,
+    session: Session,
+    butler: services::Butler,
+) -> Response {
+    if let Err(e) = butler.remove_session_from_client() {
+        #[cfg(debug_assertions)]
+        eprintln!("{:?}", e);
+    }
     LogoutPage::show(&state.tera)
 }

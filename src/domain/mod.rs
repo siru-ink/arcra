@@ -13,7 +13,7 @@ pub use currency::{
     CreateCurrencyIDError, CreateNewCurrencyError, Currency, CurrencyID, HydrateCurrencyError,
     NewCurrency,
 };
-pub use session::{HydrateSessionError, NewSession, Session, SessionID};
+pub use session::{CreateSessionIDError, HydrateSessionError, NewSession, Session, SessionID};
 pub use transaction::{
     CreateNewTransactionError, CreateTransactionIDError, HydrateTransactionError, NewTransaction,
     RoundedCurrencyTransaction, Transaction, TransactionID,

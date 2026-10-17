@@ -1,64 +1,50 @@
-use crate::{
-    crumble::{Crumble, CrumbleKind},
-    domain,
-};
-use axum::http::{StatusCode, request::Parts};
+use crate::{crumble::Crumble, domain, services};
 
 pub struct Session {
-    crumble: Crumble,
-    pool: sqlx::Pool<sqlx::Sqlite>,
+    session: domain::Session,
 }
 
-impl Session {
-    pub async fn valid(&self) -> bool {
-        let raw_id = self.crumble.get(CrumbleKind::Session);
-        let id = match raw_id.parse::<i64>() {
-            Ok(id) => id,
-            Err(_) => return false,
-        };
+#[derive(Debug, thiserror::Error)]
+pub enum SessionExtractorError {
+    #[error("Cookies could not be extracted from client request.")]
+    CookieExtractorFailed,
+    #[error("No valid/running session was found for this client.")]
+    NoValidSession,
+}
 
-        let Ok(session_id) = domain::SessionID::new(id) else {
-            return false;
-        };
-
-        let Ok(mut db_connection) = self.pool.acquire().await else {
-            return false;
-        };
-
-        session_id.exists_in_db(&mut db_connection).await
-    }
-
-    pub async fn set_new(&self) {
-        let Ok(mut db_connection) = self.pool.acquire().await else {
-            return;
-        };
-
-        let Ok(session) = domain::Session::create(&mut db_connection).await else {
-            return;
-        };
-
-        self.crumble.set(CrumbleKind::Session, session.as_string());
-    }
-
-    pub async fn remove(&self) {
-        // db::Session::vacuum(&self.pool).await;
-        self.crumble.del(CrumbleKind::Session);
+impl axum::response::IntoResponse for SessionExtractorError {
+    fn into_response(self) -> axum::response::Response {
+        match self {
+            Self::CookieExtractorFailed => {
+                return (
+                    axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+                    "Failed to extract session from client request",
+                )
+                    .into_response();
+            }
+            Self::NoValidSession => return axum::response::Redirect::to("/login").into_response(),
+        }
     }
 }
 
 impl axum::extract::FromRequestParts<std::sync::Arc<crate::AppState>> for Session {
-    type Rejection = (StatusCode, &'static str);
+    type Rejection = SessionExtractorError;
 
     async fn from_request_parts(
-        parts: &mut Parts,
+        parts: &mut axum::http::request::Parts,
         state: &std::sync::Arc<crate::AppState>,
     ) -> Result<Self, Self::Rejection> {
-        match Crumble::from_request_parts(parts, state).await {
-            Ok(crumble) => Ok(Session {
-                crumble,
-                pool: state.pool.clone(),
-            }),
-            Err(e) => Err(e),
-        }
+        let crumble = Crumble::from_request_parts(parts, state)
+            .await
+            .map_err(|_| SessionExtractorError::CookieExtractorFailed)?;
+
+        let Ok(butler) = services::Butler::from_request_parts(parts, state).await;
+
+        let session = butler
+            .get_session_from_crumble(crumble)
+            .await
+            .map_err(|_| SessionExtractorError::NoValidSession)?;
+
+        Ok(Self { session })
     }
 }

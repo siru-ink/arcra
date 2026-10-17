@@ -35,6 +35,18 @@ impl From<Session> for SessionID {
     }
 }
 
+impl TryFrom<i64> for SessionID {
+    type Error = CreateSessionIDError;
+
+    fn try_from(value: i64) -> Result<Self, Self::Error> {
+        if value > 0 {
+            return Ok(Self(value));
+        } else {
+            return Err(CreateSessionIDError::InvalidID);
+        }
+    }
+}
+
 impl SessionID {
     pub fn new(id: i64) -> Result<Self, CreateSessionIDError> {
         if id > 0 {
