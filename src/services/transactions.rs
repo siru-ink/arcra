@@ -23,6 +23,8 @@ pub enum CreateNewTransactionError {
     CreateNewTransactionFailed(#[from] domain::CreateNewTransactionError),
     #[error("Failed to create transaction record in database.")]
     DBCreateTransactionFailed(#[from] db::CreateTransactionError),
+    #[error("Failed to write sql transaction to database.")]
+    DBSqlTransactionCommitFailed(sqlx::Error),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -153,6 +155,10 @@ impl domain::Transaction {
         )?;
 
         let transaction = db::Db::create_transaction(&mut conn, new_transaction).await?;
+
+        if let Err(e) = conn.commit().await {
+            return Err(CreateNewTransactionError::DBSqlTransactionCommitFailed(e));
+        };
 
         Ok(transaction)
     }
