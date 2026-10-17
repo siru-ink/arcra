@@ -14,7 +14,11 @@ use crate::{
     template::{CurrencyCreatePage, CurrencyDeletePage, CurrencyListPage},
 };
 
-pub async fn get_currencies(State(state): State<Arc<AppState>>, flash: Flash) -> Response {
+pub async fn get_currencies(
+    State(state): State<Arc<AppState>>,
+    _session: Session,
+    flash: Flash,
+) -> Response {
     let Ok(currencies) = domain::Currency::list_all(&state.pool).await else {
         flash.set("Failed to retrieve data from database.".to_string());
         return Redirect::to("/").into_response();

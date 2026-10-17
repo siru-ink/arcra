@@ -50,6 +50,7 @@ pub struct AccountCreateForm {
 pub async fn post_create_account(
     State(state): State<Arc<AppState>>,
     flash: Flash,
+    _session: Session,
     form: Form<AccountCreateForm>,
 ) -> Response {
     if let Err(e) = domain::Account::new(
@@ -69,7 +70,11 @@ pub async fn post_create_account(
     Redirect::to("/").into_response()
 }
 
-pub async fn get_delete_account(State(state): State<Arc<AppState>>, flash: Flash) -> Response {
+pub async fn get_delete_account(
+    State(state): State<Arc<AppState>>,
+    _session: Session,
+    flash: Flash,
+) -> Response {
     let Ok(accounts) = domain::Account::list_all(&state.pool).await else {
         flash.set("Failed to load all accounts.".to_string());
         return Redirect::to("/").into_response();
@@ -86,6 +91,7 @@ pub struct AccountDeleteForm {
 pub async fn post_delete_account(
     State(state): State<Arc<AppState>>,
     flash: Flash,
+    _session: Session,
     form: axum_extra::extract::Form<AccountDeleteForm>,
 ) -> Response {
     if form.ids.len() == 0 {
@@ -103,6 +109,7 @@ pub async fn post_delete_account(
 pub async fn get_modify_account(
     State(state): State<Arc<AppState>>,
     Query(param): Query<HashMap<String, String>>,
+    _session: Session,
     flash: Flash,
 ) -> Response {
     let account_id = match param
@@ -133,6 +140,7 @@ pub struct AccountModifyForm {
 pub async fn post_modify_account(
     State(state): State<Arc<AppState>>,
     flash: Flash,
+    _session: Session,
     form: Form<AccountModifyForm>,
 ) -> Response {
     match domain::Account::rename(&state.pool, form.account_id, form.name.clone()).await {

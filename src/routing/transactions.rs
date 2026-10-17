@@ -25,7 +25,11 @@ pub async fn get_list(
     TransactionListPage::show(&state.tera, transactions, flash.message())
 }
 
-pub async fn get_create(State(state): State<Arc<AppState>>, flash: Flash) -> Response {
+pub async fn get_create(
+    State(state): State<Arc<AppState>>,
+    _session: Session,
+    flash: Flash,
+) -> Response {
     let Ok(accounts) = domain::Account::list_all(&state.pool).await else {
         flash.set("Could not retrieve list of accounts.".to_string());
         return Redirect::to("/").into_response();
@@ -96,6 +100,7 @@ pub struct TransactionDeleteForm {
 pub async fn post_delete(
     State(state): State<Arc<AppState>>,
     flash: Flash,
+    _session: Session,
     form: Form<TransactionDeleteForm>,
 ) -> Response {
     if let Err(_) = domain::Transaction::drop(&state.pool, form.id).await {
