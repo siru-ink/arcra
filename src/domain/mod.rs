@@ -5,8 +5,8 @@ mod session;
 mod transaction;
 
 pub use account::{
-    Account, AccountID, CreateAccountIDError, CreateNewAccountError, HydrateAccountError,
-    NewAccount, RoundedCurrencyAccount,
+    Account, AccountID, CreateAccountIDError, CreateNewAccountError, FlowDirection,
+    HydrateAccountError, NewAccount, RoundedCurrencyAccount,
 };
 pub use account_type::{AccountType, HydrateAccountTypeError};
 pub use currency::{
@@ -15,6 +15,6 @@ pub use currency::{
 };
 pub use session::{HydrateSessionError, NewSession, Session, SessionID};
 pub use transaction::{
-    CreateTransactionIDError, HydrateTransactionError, NewTransaction, RoundedCurrencyTransaction,
-    Transaction, TransactionID,
+    CreateNewTransactionError, CreateTransactionIDError, HydrateTransactionError, NewTransaction,
+    RoundedCurrencyTransaction, Transaction, TransactionID,
 };

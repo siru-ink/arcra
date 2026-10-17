@@ -3,6 +3,9 @@ use serde::Serialize;
 use crate::domain;
 
 #[derive(Debug, thiserror::Error)]
+pub enum CreateNewTransactionError {}
+
+#[derive(Debug, thiserror::Error)]
 pub enum CreateTransactionIDError {
     #[error("The provided id must be a positive integer.")]
     InvalidID,
@@ -20,6 +23,7 @@ pub enum HydrateTransactionError {
     InvalidDebitAccount(domain::HydrateAccountError),
 }
 
+#[derive(Clone, Copy)]
 pub struct TransactionID(i64);
 
 pub struct NewTransaction {
@@ -109,6 +113,16 @@ impl NewTransaction {
 
     pub fn description(&self) -> &str {
         &self.description
+    }
+
+    pub fn new(
+        description: String,
+        credit_account: domain::Account,
+        credit_amount: i64,
+        debit_account: domain::Account,
+        debit_amount: i64,
+    ) -> Result<Self, CreateNewTransactionError> {
+        todo!()
     }
 
     pub fn time(&self) -> chrono::DateTime<chrono::Utc> {
@@ -203,6 +217,35 @@ impl Transaction {
 
     pub fn id(&self) -> i64 {
         self.id
+    }
+
+    pub fn into_parts(
+        self,
+    ) -> (
+        String,
+        chrono::DateTime<chrono::Utc>,
+        domain::Account,
+        i64,
+        domain::Account,
+        i64,
+    ) {
+        let Transaction {
+            description,
+            time,
+            credit_account,
+            credit_amount,
+            debit_account,
+            debit_amount,
+            ..
+        } = self;
+        (
+            description,
+            time,
+            credit_account,
+            credit_amount,
+            debit_account,
+            debit_amount,
+        )
     }
 
     pub fn time(&self) -> chrono::DateTime<chrono::Utc> {

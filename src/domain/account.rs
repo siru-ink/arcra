@@ -23,6 +23,11 @@ pub enum CreateAccountIDError {
     InvalidID,
 }
 
+pub enum FlowDirection {
+    Incoming,
+    Outgoing,
+}
+
 pub struct AccountID(i64);
 
 pub struct NewAccount {
@@ -73,6 +78,18 @@ impl TryFrom<&i64> for AccountID {
     fn try_from(value: &i64) -> Result<Self, Self::Error> {
         if *value > 0 {
             Ok(AccountID(*value))
+        } else {
+            Err(CreateAccountIDError::InvalidID)
+        }
+    }
+}
+
+impl TryFrom<i64> for AccountID {
+    type Error = CreateAccountIDError;
+
+    fn try_from(value: i64) -> Result<Self, Self::Error> {
+        if value > 0 {
+            Ok(AccountID(value))
         } else {
             Err(CreateAccountIDError::InvalidID)
         }
@@ -164,6 +181,10 @@ impl Account {
 
     pub fn name(&self) -> &str {
         &self.name
+    }
+
+    pub fn update_balance(self, dir: FlowDirection, delta_balance: i64) -> Self {
+        todo!()
     }
 
     pub fn set_name(self, new_name: String) -> Self {
