@@ -1,7 +1,6 @@
 use crate::{
-    AppState,
-    crumble::{Flash, Session},
-    domain,
+    AppState, domain,
+    ext::crumble::{Flash, Session},
     template::{TransactionCreatePage, TransactionDeletePage, TransactionListPage},
 };
 use axum::{

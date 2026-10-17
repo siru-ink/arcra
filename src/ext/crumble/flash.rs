@@ -1,4 +1,4 @@
-use crate::crumble::{Crumble, CrumbleKind};
+use crate::ext::crumble::{Crumble, CrumbleKind};
 use axum::{
     extract::FromRequestParts,
     http::{StatusCode, request::Parts},

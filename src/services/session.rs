@@ -58,9 +58,9 @@ impl domain::Session {
 impl services::Butler {
     pub async fn get_session_from_crumble(
         &self,
-        crumble: crate::crumble::Crumble,
+        crumble: crate::ext::crumble::Crumble,
     ) -> Result<domain::Session, GetSessionFromCrumbleError> {
-        let raw_id = crumble.get(crate::crumble::CrumbleKind::Session);
+        let raw_id = crumble.get(crate::ext::crumble::CrumbleKind::Session);
         if raw_id.is_empty() {
             return Err(GetSessionFromCrumbleError::SessionCookieEmpty);
         }

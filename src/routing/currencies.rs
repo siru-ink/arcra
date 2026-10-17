@@ -8,9 +8,8 @@ use axum_extra::extract::Form;
 use serde::Deserialize;
 
 use crate::{
-    AppState,
-    crumble::{Flash, Session},
-    domain,
+    AppState, domain,
+    ext::crumble::{Flash, Session},
     template::{CurrencyCreatePage, CurrencyDeletePage, CurrencyListPage},
 };
 

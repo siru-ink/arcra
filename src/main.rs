@@ -11,7 +11,6 @@ use tera::Tera;
 use tokio::{main, net::TcpListener};
 use tower_cookies::{CookieManagerLayer, Key};
 
-mod crumble;
 mod db;
 mod domain;
 mod env;

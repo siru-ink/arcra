@@ -1,6 +1,6 @@
 use crate::{
     AppState, PASSWORD_HASH, USERNAME,
-    crumble::{Flash, Session},
+    ext::crumble::{Flash, Session},
     services,
     template::{LoginPage, LogoutPage},
 };
