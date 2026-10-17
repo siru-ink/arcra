@@ -18,7 +18,8 @@ impl axum::extract::FromRequestParts<std::sync::Arc<crate::AppState>>
         _parts: &mut axum::http::request::Parts,
         state: &std::sync::Arc<crate::AppState>,
     ) -> Result<Self, Self::Rejection> {
-        Ok(crate::template::Publisher::new(state.tera.clone()))
+        Ok(crate::template::Publisher::new(std::sync::Arc::clone(
+            &state.tera,
+        )))
     }
 }
-

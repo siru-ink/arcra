@@ -22,7 +22,7 @@ mod template;
 
 struct AppState {
     pool: SqlitePool,
-    tera: Tera,
+    tera: Arc<Tera>,
 }
 
 static USERNAME: OnceLock<String> = OnceLock::new();
@@ -61,7 +61,7 @@ async fn main() {
 
     let appstate = Arc::new(AppState {
         pool: pool,
-        tera: tera,
+        tera: Arc::new(tera),
     });
 
     let router = routing::get();

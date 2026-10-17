@@ -6,16 +6,12 @@ use axum::{
 use tera::{Context, Tera};
 
 pub struct Publisher {
-    tera: Tera,
+    tera: std::sync::Arc<Tera>,
 }
 
 impl Publisher {
-    pub fn new(tera: tera::Tera) -> Self {
+    pub fn new(tera: std::sync::Arc<tera::Tera>) -> Self {
         Self { tera }
-    }
-
-    pub fn hello_world(self) -> Response {
-        "Hello, world!".into_response()
     }
 }
 
