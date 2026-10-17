@@ -15,6 +15,7 @@ mod crumble;
 mod db;
 mod domain;
 mod env;
+mod ext;
 mod routing;
 mod services;
 mod template;
