@@ -104,14 +104,14 @@ impl domain::Account {
         dbase: &SqlitePool,
         name: String,
         currency_id: i64,
-        account_type_id: i64,
+        account_type_id: &str,
     ) -> Result<domain::Account, CreateAccountError> {
         let currency_id = domain::CurrencyID::try_from(currency_id)?;
         let mut conn = dbase.acquire().await?;
         let Some(currency) = db::Db::read_currency(&mut conn, currency_id).await? else {
             return Err(CreateAccountError::NoCurrencyFound);
         };
-        let account_type = domain::AccountType::hydrate(account_type_id)?;
+        let account_type = domain::AccountType::try_from(account_type_id)?;
         let new_account = domain::NewAccount::new(name, currency, account_type)?;
         let account = db::Db::create_account(&mut conn, new_account).await?;
         Ok(account)

@@ -20,7 +20,7 @@
     <select name="account_type" id="account_type" required >
         <option selected disabled value="" >--Please select--</option>
         {% for account_type in account_types %}
-        <option value="{{ account_type.id }}">{{ account_type.name }}</option>
+        <option value="{{ account_type }}">{{ account_type }}</option>
         {% endfor %}
     </select>
     <br>

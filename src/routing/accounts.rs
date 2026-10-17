@@ -64,7 +64,7 @@ pub async fn post_create_account(
         &state.pool,
         form.name.clone(),
         form.currency,
-        form.account_type,
+        &form.account_type,
     )
     .await
     {

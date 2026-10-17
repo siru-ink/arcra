@@ -15,6 +15,21 @@ pub enum AccountType {
     Revenue,
 }
 
+impl TryFrom<&str> for AccountType {
+    type Error = HydrateAccountTypeError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "Asset" => Ok(AccountType::Asset),
+            "Expense" => Ok(AccountType::Expense),
+            "Equity" => Ok(AccountType::Equity),
+            "Liability" => Ok(AccountType::Liability),
+            "Revenue" => Ok(AccountType::Revenue),
+            _ => Err(HydrateAccountTypeError::InvalidId),
+        }
+    }
+}
+
 impl AccountType {
     pub fn id(&self) -> i64 {
         *self as i64
