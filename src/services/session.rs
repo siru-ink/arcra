@@ -1,5 +1,4 @@
 use crate::{db, domain, services};
-use sqlx::SqliteConnection;
 
 #[derive(Debug, thiserror::Error)]
 pub enum GetSessionFromCrumbleError {
@@ -26,15 +25,6 @@ pub enum SaveNewSessionError {
     SqlConnectionFailed(#[from] sqlx::Error),
     #[error("Failed to save new session in database.")]
     DBCreateSessionFailed(#[from] db::CreateSessionError),
-}
-
-impl domain::SessionID {
-    pub async fn exists_in_db(self, conn: &mut SqliteConnection) -> bool {
-        match db::Db::read_session(conn, self).await {
-            Ok(Some(_)) => true,
-            _ => false,
-        }
-    }
 }
 
 impl services::Butler {
