@@ -4,7 +4,7 @@ use crate::domain;
 pub enum CreateCategoryError {
     #[error("Sqlx sql execution failed.")]
     SqlFailed(#[from] sqlx::Error),
-    #[error("Failed to convert new database row into ")]
+    #[error("Failed to convert new database row into domain object.")]
     HydrateFailed(#[from] domain::CategoryHydrateError),
 }
 
@@ -14,7 +14,7 @@ pub enum ReadCategoryError {
     SqlFailed(#[from] sqlx::Error),
     #[error("No row found for ID in database.")]
     RowNotFound,
-    #[error("Failed to convert new database row into ")]
+    #[error("Failed to convert new database row into domain object.")]
     HydrateFailed(#[from] domain::CategoryHydrateError),
 }
 
