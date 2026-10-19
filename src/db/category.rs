@@ -34,6 +34,14 @@ pub enum DeleteCategoryError {
     NoRowDeleted,
 }
 
+#[derive(Debug, thiserror::Error)]
+pub enum ListAllCategoriesError {
+    #[error("Sqlx sql execution failed.")]
+    SqlFailed(#[from] sqlx::Error),
+    #[error("Failed to convert (at least one) database row into domain object.")]
+    HydrateFailed(#[from] domain::CategoryHydrateError),
+}
+
 struct CategoryRow {
     id: i64,
     name: String,
@@ -131,5 +139,20 @@ impl crate::db::Db {
         }
 
         Ok(())
+    }
+
+    pub async fn list_all_categories(
+        conn: &mut sqlx::SqliteConnection,
+    ) -> Result<Vec<domain::Category>, ListAllCategoriesError> {
+        let categories_rows = sqlx::query_as!(CategoryRow, "SELECT * FROM categories")
+            .fetch_all(conn)
+            .await?;
+
+        let categories = categories_rows
+            .into_iter()
+            .map(domain::Category::try_from)
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(categories)
     }
 }
