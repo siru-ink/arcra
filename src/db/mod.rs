@@ -1,4 +1,5 @@
 mod account;
+mod category;
 mod currency;
 mod session;
 mod transaction;
