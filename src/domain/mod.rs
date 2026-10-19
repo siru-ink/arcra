@@ -1,5 +1,6 @@
 mod account;
 mod account_type;
+mod category;
 mod currency;
 mod session;
 mod transaction;
@@ -9,6 +10,9 @@ pub use account::{
     HydrateAccountError, NewAccount, RoundedCurrencyAccount,
 };
 pub use account_type::{AccountType, HydrateAccountTypeError};
+pub use category::{
+    Category, CategoryHydrateError, CategoryID, NewCategory, NewCategoryContructorError,
+};
 pub use currency::{
     CreateCurrencyIDError, CreateNewCurrencyError, Currency, CurrencyID, HydrateCurrencyError,
     NewCurrency,
