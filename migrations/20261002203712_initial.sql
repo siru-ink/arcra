@@ -10,6 +10,12 @@ INSERT INTO currencies (name, descriptor, symbol) VALUES
 ('USD', 'united states dollar', '$'),
 ('CNY', 'renminbi', '¥');
 
+CREATE TABLE categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL,
+    description TEXT UNIQUE NOT NULL
+);
+
 CREATE TABLE accounts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
