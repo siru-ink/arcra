@@ -96,8 +96,13 @@ pub async fn post_modify(
         Err(e) => {
             #[cfg(debug_assertions)]
             eprintln!("Error in category::post_modify handler: {:?}", e);
-
-            flash.set("Could not modify category. Please try again.".to_string());
+            match e {
+                crate::services::ServiceCategoryUpdateDataError::InvalidUpdateData => {
+                    flash.set("At least either name or description must be edited to modify the category data.".to_string());
+                    return Redirect::to(&format!("/categories/modify/{}", id)).into_response();
+                }
+                _ => flash.set("Could not modify category. Please try again.".to_string()),
+            }
         }
     };
     Redirect::to("/categories/list").into_response()

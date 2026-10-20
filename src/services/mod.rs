@@ -4,6 +4,8 @@ mod currency;
 mod session;
 mod transactions;
 
+pub use category::ServiceCategoryUpdateDataError;
+
 pub struct Butler {
     dbase: sqlx::Pool<sqlx::Sqlite>,
 }
