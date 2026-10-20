@@ -1,6 +1,16 @@
 use crate::domain;
 
 #[derive(Debug, thiserror::Error)]
+pub enum ServiceCategoryCreateError {
+    #[error("Failed to construct NewCategory domain object from provided input.")]
+    NewCategoryConstructorFailed(#[from] domain::NewCategoryContructorError),
+    #[error("Failed to aquire a database connection.")]
+    DBConnectionFailed(#[from] sqlx::Error),
+    #[error("Failed to create new category record in database.")]
+    DBCreateCategoryFailed(#[from] crate::db::CreateCategoryError),
+}
+
+#[derive(Debug, thiserror::Error)]
 pub enum ServiceCategoryListAllError {
     #[error("Failed to aquire a database connection.")]
     DBConnectionFailed(#[from] sqlx::Error),
@@ -33,6 +43,17 @@ pub enum ServiceCategoryUpdateDataError {
 }
 
 impl crate::services::Butler {
+    pub async fn create_category(
+        &self,
+        new_name: String,
+        new_description: String,
+    ) -> Result<domain::Category, ServiceCategoryCreateError> {
+        let new_category = domain::NewCategory::new(new_name, new_description)?;
+        let mut conn = self.dbase.acquire().await?;
+        let category = crate::db::Db::create_category(&mut conn, new_category).await?;
+        Ok(category)
+    }
+
     pub async fn get_category_by_id(
         &self,
         category_id: i64,

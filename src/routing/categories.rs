@@ -19,12 +19,39 @@ pub async fn get_list(
     publisher.category_list_page(categories, flash.message())
 }
 
-pub async fn get_create(_: Session) -> axum::response::Response {
-    todo!()
+pub async fn get_create(
+    _: Session,
+    flash: Flash,
+    publisher: Publisher,
+) -> axum::response::Response {
+    publisher.category_create_page(flash.message())
 }
 
-pub async fn post_create(_: Session) -> axum::response::Response {
-    todo!()
+#[derive(serde::Deserialize)]
+pub struct CategoryCreateForm {
+    name: String,
+    description: String,
+}
+
+pub async fn post_create(
+    _: Session,
+    butler: Butler,
+    flash: Flash,
+    axum_extra::extract::Form(form): axum_extra::extract::Form<CategoryCreateForm>,
+) -> axum::response::Response {
+    let CategoryCreateForm { name, description } = form;
+    match butler.create_category(name, description).await {
+        Ok(_) => {
+            flash.set("New category created successfully.".to_string());
+            return Redirect::to("/categories/list").into_response();
+        }
+        Err(e) => {
+            #[cfg(debug_assertions)]
+            eprintln!("Error in category::post_create handler: {:?}", e);
+            flash.set("Could not create new category. Please try again.".to_string());
+            return Redirect::to("/categories/create").into_response();
+        }
+    }
 }
 
 pub async fn get_modify(
