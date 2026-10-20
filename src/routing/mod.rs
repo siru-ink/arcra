@@ -56,18 +56,18 @@ pub fn get() -> Router<Arc<AppState>> {
             "/transactions/delete",
             routing::get(transactions::get_delete).post(transactions::post_delete),
         )
-        .route("/categories/list", routing::get(categories::get_list()))
+        .route("/categories/list", routing::get(categories::get_list))
         .route(
             "/categories/create",
-            routing::get(categories::get_create()).post(categories::post_create()),
+            routing::get(categories::get_create).post(categories::post_create),
         )
         .route(
             "/categories/modify",
-            routing::get(categories::get_modify()).post(categories::post_modify()),
+            routing::get(categories::get_modify).post(categories::post_modify),
         )
         .route(
             "/categories/delete",
-            routing::get(categories::get_delete()).post(categories::post_delete()),
+            routing::get(categories::get_delete).post(categories::post_delete),
         )
 }
 
