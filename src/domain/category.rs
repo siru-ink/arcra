@@ -16,6 +16,7 @@ pub enum CategoryHydrateError {
     InvalidDescription,
 }
 
+#[derive(serde::Serialize)]
 pub struct Category {
     id: i64,
     name: String,

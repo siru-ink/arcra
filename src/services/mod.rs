@@ -1,4 +1,5 @@
 mod account;
+mod category;
 mod currency;
 mod session;
 mod transactions;
@@ -12,4 +13,3 @@ impl Butler {
         Self { dbase }
     }
 }
-

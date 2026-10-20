@@ -16,6 +16,10 @@ CREATE TABLE categories (
     description TEXT UNIQUE NOT NULL
 );
 
+INSERT INTO categories (name, description) VALUES
+('grocery', 'accounts related to grocery transactions'),
+('utility', 'accounts related to utility transactions');
+
 CREATE TABLE accounts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
