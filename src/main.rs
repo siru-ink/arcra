@@ -2,7 +2,7 @@ use crate::env::EnvConfiguration;
 use axum::{
     extract::Request,
     middleware::{Next, from_fn},
-    response::Response,
+    response::{IntoResponse, Response},
     serve,
 };
 use sqlx::SqlitePool;
@@ -63,7 +63,7 @@ async fn main() {
         tera: Arc::new(tera),
     });
 
-    let router = routing::get();
+    let router = routing::get().fallback(error_handler_404);
 
     #[cfg(debug_assertions)]
     let router = router.layer(from_fn(logger));
@@ -114,4 +114,9 @@ async fn check_interupt() {
         _ = ctrl_c => {},
         _ = terminate => {},
     }
+}
+
+async fn error_handler_404(flash: crate::ext::Flash) -> Response {
+    flash.set("The requested webpage could not be found (Error 404 Not Found). You have been redirected to the homepage instead.".to_string());
+    axum::response::Redirect::to("/").into_response()
 }
