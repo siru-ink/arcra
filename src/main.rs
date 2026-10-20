@@ -116,7 +116,11 @@ async fn check_interupt() {
     }
 }
 
-async fn error_handler_404(flash: crate::ext::Flash) -> Response {
-    flash.set("The requested webpage could not be found (Error 404 Not Found). You have been redirected to the homepage instead.".to_string());
+async fn error_handler_404(flash: crate::ext::Flash, uri: axum::http::Uri) -> Response {
+    let path = uri.path();
+    let ignored_paths = ["/favicon.ico", "/robots.txt", "/sitemap.xml"];
+    if !ignored_paths.contains(&path) {
+        flash.set("The requested webpage could not be found (Error 404 Not Found). You have been redirected to the homepage instead.".to_string());
+    }
     axum::response::Redirect::to("/").into_response()
 }
