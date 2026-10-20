@@ -29,13 +29,9 @@ impl Publisher {
 
     pub fn index_page(self, flash: Option<String>) -> Response {
         let mut context = Context::new();
-
-        context.insert("pagenav", &true);
-
         if let Some(message) = flash {
             context.insert("flash", &message);
         }
-
         match self.tera.render("index.html", &context) {
             Ok(page) => Html(page).into_response(),
             Err(e) => self.error_page("Tera failed to render <index.html> template", e),
