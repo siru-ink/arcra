@@ -103,10 +103,41 @@ pub async fn post_modify(
     Redirect::to("/categories/list").into_response()
 }
 
-pub async fn get_delete(_: Session) -> axum::response::Response {
-    todo!()
+pub async fn get_delete(
+    _: Session,
+    butler: Butler,
+    flash: Flash,
+    publisher: Publisher,
+) -> axum::response::Response {
+    let categories = match butler.list_all_categories().await {
+        Ok(categories) => categories,
+        Err(e) => {
+            #[cfg(debug_assertions)]
+            eprintln!("Error in category::get_delete handler: {:?}", e);
+            flash.set("Could not load all categories.".to_string());
+            return Redirect::to("/").into_response();
+        }
+    };
+    publisher.category_delete_page(categories, flash.message())
 }
 
-pub async fn post_delete(_: Session) -> axum::response::Response {
-    todo!()
+#[derive(serde::Deserialize)]
+pub struct CategoryDeleteForm {
+    id: i64,
+}
+
+pub async fn post_delete(
+    _: Session,
+    butler: Butler,
+    flash: Flash,
+    axum_extra::extract::Form(form): axum_extra::extract::Form<CategoryDeleteForm>,
+) -> axum::response::Response {
+    if let Err(e) = butler.drop_category(form.id).await {
+        #[cfg(debug_assertions)]
+        eprintln!("Error in category::post_delete handler: {:?}", e);
+        flash.set("Could not delete category. Is it maybe still being used?".to_string());
+    } else {
+        flash.set("Deleted category successfully.".to_string());
+    }
+    Redirect::to("/categories/list").into_response()
 }

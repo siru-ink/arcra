@@ -141,6 +141,23 @@ impl Publisher {
         }
     }
 
+    pub fn category_delete_page(
+        self,
+        categories: Vec<domain::Category>,
+        flash: Option<String>,
+    ) -> Response {
+        let mut context = Context::new();
+        context.insert("pagenav", &true);
+        context.insert("categories", &categories);
+        if let Some(message) = flash {
+            context.insert("flash", &message);
+        }
+        match self.tera.render("category_delete.html", &context) {
+            Ok(page) => Html(page).into_response(),
+            Err(e) => self.error_page("Tera failed to render <category_delete.html> template.", e),
+        }
+    }
+
     pub fn category_list_page(
         self,
         categories: Vec<domain::Category>,

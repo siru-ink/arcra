@@ -11,6 +11,16 @@ pub enum ServiceCategoryCreateError {
 }
 
 #[derive(Debug, thiserror::Error)]
+pub enum ServiceCategoryDropError {
+    #[error("Failed to construct CategoryID domain object from provided id.")]
+    CategoryIDConstructorFailed(#[from] domain::CategoryIDConstructorError),
+    #[error("Failed to aquire a database connection.")]
+    DBConnectionFailed(#[from] sqlx::Error),
+    #[error("Failed to delete record from database.")]
+    DBDeleteCategoryFailed(#[from] crate::db::DeleteCategoryError),
+}
+
+#[derive(Debug, thiserror::Error)]
 pub enum ServiceCategoryListAllError {
     #[error("Failed to aquire a database connection.")]
     DBConnectionFailed(#[from] sqlx::Error),
@@ -52,6 +62,13 @@ impl crate::services::Butler {
         let mut conn = self.dbase.acquire().await?;
         let category = crate::db::Db::create_category(&mut conn, new_category).await?;
         Ok(category)
+    }
+
+    pub async fn drop_category(&self, category_id: i64) -> Result<(), ServiceCategoryDropError> {
+        let category_id = domain::CategoryID::try_from(category_id)?;
+        let mut conn = self.dbase.acquire().await?;
+        let _ = crate::db::Db::delete_category(&mut conn, category_id).await?;
+        Ok(())
     }
 
     pub async fn get_category_by_id(
