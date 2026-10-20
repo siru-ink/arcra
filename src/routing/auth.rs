@@ -24,6 +24,7 @@ pub struct LoginForm {
 pub async fn post_login(
     flash: Flash,
     butler: crate::services::Butler,
+    crumble: crate::ext::crumble::Crumble,
     Form(form): Form<LoginForm>,
 ) -> Response {
     let global_username = USERNAME
@@ -50,7 +51,7 @@ pub async fn post_login(
         return Redirect::to("/login").into_response();
     }
 
-    if let Err(e) = butler.save_new_session().await {
+    if let Err(e) = butler.save_new_session(crumble).await {
         #[cfg(debug_assertions)]
         eprintln!("{:?}", e);
         flash.set("Could not save session to browser.".to_string());

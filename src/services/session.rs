@@ -47,10 +47,17 @@ impl services::Butler {
         crumble.del(crate::ext::crumble::CrumbleKind::Session);
     }
 
-    pub async fn save_new_session(&self) -> Result<(), SaveNewSessionError> {
+    pub async fn save_new_session(
+        &self,
+        crumble: crate::ext::crumble::Crumble,
+    ) -> Result<(), SaveNewSessionError> {
         let new_session = domain::NewSession::new();
         let mut conn = self.dbase.acquire().await?;
-        let _ = db::Db::create_session(&mut conn, new_session).await?;
+        let session = db::Db::create_session(&mut conn, new_session).await?;
+        crumble.set(
+            crate::ext::crumble::CrumbleKind::Session,
+            session.id().to_string(),
+        );
         Ok(())
     }
 }
