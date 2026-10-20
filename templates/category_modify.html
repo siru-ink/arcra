@@ -1,0 +1,18 @@
+{% extends '_base.html' %}
+
+{% block title %}Modify Category | {% endblock title %}
+
+{% block content %}
+<h2>Modify Category</h2>
+<form method="post" action="/categories/modify">
+    <p>Insert new values to update or leave empty to keep the old values.</p>
+    <input type="hidden" name="id" required value="{{ category.id }}" />
+    <label for="name">Name:</label>
+    <input type="text" name="name" id="name" placeholder="{{ category.name }}" />
+    <br />
+    <label for="description">Description:</label>
+    <input type="text" name="description" id="description" placeholder="{{ category.description }}" />
+    <br />
+    <button type="submit">Update</button>
+</form>
+{% endblock content %}

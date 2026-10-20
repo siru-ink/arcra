@@ -11,7 +11,8 @@ pub use account::{
 };
 pub use account_type::{AccountType, HydrateAccountTypeError};
 pub use category::{
-    Category, CategoryHydrateError, CategoryID, NewCategory, NewCategoryContructorError,
+    Category, CategoryHydrateError, CategoryID, CategoryIDConstructorError, NewCategory,
+    NewCategoryContructorError,
 };
 pub use currency::{
     CreateCurrencyIDError, CreateNewCurrencyError, Currency, CurrencyID, HydrateCurrencyError,

@@ -146,6 +146,23 @@ impl Publisher {
         }
     }
 
+    pub fn category_modify_page(
+        self,
+        category: domain::Category,
+        flash: Option<String>,
+    ) -> Response {
+        let mut context = Context::new();
+        context.insert("pagenav", &true);
+        context.insert("category", &category);
+        if let Some(message) = flash {
+            context.insert("flash", &message);
+        }
+        match self.tera.render("category_modify.html", &context) {
+            Ok(page) => Html(page).into_response(),
+            Err(e) => self.error_page("Tera failed to render <category_modify.html> template.", e),
+        }
+    }
+
     pub fn currency_list_page(
         self,
         currencies: Vec<domain::Currency>,

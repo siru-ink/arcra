@@ -27,12 +27,53 @@ pub async fn post_create(_: Session) -> axum::response::Response {
     todo!()
 }
 
-pub async fn get_modify(_: Session) -> axum::response::Response {
-    todo!()
+pub async fn get_modify(
+    _: Session,
+    axum::extract::Path(id): axum::extract::Path<i64>,
+    butler: Butler,
+    flash: Flash,
+    publisher: Publisher,
+) -> axum::response::Response {
+    let category = match butler.get_category_by_id(id).await {
+        Ok(category) => category,
+        Err(e) => {
+            #[cfg(debug_assertions)]
+            eprintln!("Error in category::get_modify handler: {:?}", e);
+            flash.set("Could not modify category. Please try again.".to_string());
+            return Redirect::to("/categories/list").into_response();
+        }
+    };
+    publisher.category_modify_page(category, flash.message())
 }
 
-pub async fn post_modify(_: Session) -> axum::response::Response {
-    todo!()
+#[derive(serde::Deserialize)]
+pub struct CategoryModifyForm {
+    id: i64,
+    name: Option<String>,
+    description: Option<String>,
+}
+
+pub async fn post_modify(
+    _: Session,
+    butler: Butler,
+    flash: Flash,
+    axum_extra::extract::Form(form): axum_extra::extract::Form<CategoryModifyForm>,
+) -> axum::response::Response {
+    let CategoryModifyForm {
+        id,
+        name,
+        description,
+    } = form;
+    match butler.update_category_data(id, name, description).await {
+        Ok(_) => flash.set("Updated category successfully.".to_string()),
+        Err(e) => {
+            #[cfg(debug_assertions)]
+            eprintln!("Error in category::post_modify handler: {:?}", e);
+
+            flash.set("Could not modify category. Please try again.".to_string());
+        }
+    };
+    Redirect::to("/categories/list").into_response()
 }
 
 pub async fn get_delete(_: Session) -> axum::response::Response {

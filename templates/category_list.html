@@ -7,7 +7,7 @@
 <ul>
     {% for category in categories %}
     <li>
-        <a href="/category/modify?category_id={{ category.id }}">{{ category.name }}</a>
+        <a href="/categories/modify/{{ category.id }}">{{ category.name }}</a>
         <br />
         {{category.description}}
     </li>

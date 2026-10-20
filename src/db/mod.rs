@@ -5,7 +5,7 @@ mod session;
 mod transaction;
 
 pub use account::{CreateAccountError, DeleteAccountError, ReadAccountError, UpdateAccountError};
-pub use category::ListAllCategoriesError;
+pub use category::{ListAllCategoriesError, ReadCategoryError, UpdateCategoryError};
 pub use currency::{CreateCurrencyError, DeleteCurrencyError, ReadCurrencyError};
 pub use session::{CreateSessionError, ReadSessionError};
 use sqlx::{
