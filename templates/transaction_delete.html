@@ -11,9 +11,9 @@
         <b>Description:</b> {{ transaction.description }}<br />
         <b>Date:</b> {{ transaction.time | truncate(length=10, end="") }}<br />
         <b>Credit Account:</b> {{ transaction.credit_account.name }}<br />
-        <b>Credit Amount:</b> {{ transaction.credit_amount | round(method="ceil", precision=2) }}&nbsp;{{ transaction.credit_account.currency.symbol }}<br />
+        <b>Credit Amount:</b> {{ transaction.credit_amount | money }}&nbsp;{{ transaction.credit_account.currency.symbol }}<br />
         <b>Debit Account:</b> {{ transaction.debit_account.name }}<br />
-        <b>Debit Amount:</b> {{ transaction.debit_amount | round(method="ceil", precision=2) }}&nbsp;{{ transaction.debit_account.currency.symbol }}
+        <b>Debit Amount:</b> {{ transaction.debit_amount | money }}&nbsp;{{ transaction.debit_account.currency.symbol }}
     </p>
     <button type="submit">Permanently Delete</button>
 </form>

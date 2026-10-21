@@ -10,7 +10,7 @@
         {{ category }}
         <ul>
             {% for symbol,amount in currencies %}
-            <li>{{ symbol }} {{ amount }}</li>
+            <li>{{ symbol }} {{ amount | money }}</li>
             {% endfor %}
         </ul>
     </li>

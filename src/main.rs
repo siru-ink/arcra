@@ -55,6 +55,7 @@ async fn main() {
     let pool = db::init_db_connection().await;
 
     let mut tera = Tera::default();
+    tera.register_filter("money", money_format_template);
     tera.load_from_glob("templates/**/*.html")
         .expect("Tera templates should exist in $(pwd)/templates directory");
 
@@ -123,4 +124,12 @@ async fn error_handler_404(flash: crate::ext::Flash, uri: axum::http::Uri) -> Re
         flash.set("The requested webpage could not be found (Error 404 Not Found). You have been redirected to the homepage instead.".to_string());
     }
     axum::response::Redirect::to("/").into_response()
+}
+
+fn money_format_template(value: i64, _: tera::Kwargs, _: &tera::State) -> String {
+    let sign = if value < 0 { "-" } else { "" };
+    let value = value.abs();
+    let euros = value / 100;
+    let cents = value % 100;
+    format!("{}{}.{:02}", sign, euros, cents)
 }
