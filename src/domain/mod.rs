@@ -7,7 +7,7 @@ mod transaction;
 
 pub use account::{
     Account, AccountID, CreateAccountIDError, CreateNewAccountError, FlowDirection,
-    HydrateAccountError, NewAccount, RoundedCurrencyAccount,
+    HydrateAccountError, NewAccount,
 };
 pub use account_type::{AccountType, HydrateAccountTypeError};
 pub use category::{
@@ -21,5 +21,5 @@ pub use currency::{
 pub use session::{CreateSessionIDError, HydrateSessionError, NewSession, Session, SessionID};
 pub use transaction::{
     CreateNewTransactionError, CreateTransactionIDError, HydrateTransactionError, NewTransaction,
-    RoundedCurrencyTransaction, Transaction, TransactionID,
+    Transaction, TransactionID,
 };

@@ -66,11 +66,6 @@ impl Publisher {
         accounts: Vec<domain::Account>,
         flash: Option<String>,
     ) -> Response {
-        let accounts = accounts
-            .into_iter()
-            .map(domain::RoundedCurrencyAccount::from)
-            .collect::<Vec<domain::RoundedCurrencyAccount>>();
-
         let mut context = Context::new();
 
         context.insert("pagenav", &true);
@@ -257,15 +252,10 @@ impl Publisher {
         transactions: Vec<domain::Transaction>,
         flash: Option<String>,
     ) -> Response {
-        let transformed_transactions = transactions
-            .into_iter()
-            .map(domain::RoundedCurrencyTransaction::from)
-            .collect::<Vec<domain::RoundedCurrencyTransaction>>();
-
         let mut context = Context::new();
 
         context.insert("pagenav", &true);
-        context.insert("transactions", &transformed_transactions);
+        context.insert("transactions", &transactions);
 
         if let Some(message) = flash {
             context.insert("flash", &message);
@@ -301,8 +291,6 @@ impl Publisher {
     }
 
     pub fn transaction_delete_page(self, transaction: domain::Transaction) -> Response {
-        let transaction = domain::RoundedCurrencyTransaction::from(transaction);
-
         let mut context = Context::new();
 
         context.insert("pagenav", &true);
