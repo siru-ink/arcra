@@ -5,7 +5,6 @@ use crate::{
     template::Publisher,
 };
 use axum::response::{IntoResponse, Redirect, Response};
-use std::collections::BTreeMap;
 
 pub async fn get_expense_by_category(
     butler: Butler,
@@ -18,7 +17,8 @@ pub async fn get_expense_by_category(
         return Redirect::to("/").into_response();
     };
 
-    let mut totals: BTreeMap<String, BTreeMap<String, i64>> = BTreeMap::new();
+    let mut totals: std::collections::HashMap<String, std::collections::HashMap<String, i64>> =
+        std::collections::HashMap::new();
 
     for transaction in transactions {
         let debit_account = transaction.debit_account();

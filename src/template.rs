@@ -1,5 +1,3 @@
-use std::collections::BTreeMap;
-
 use crate::domain;
 use axum::response::{Html, IntoResponse, Response};
 use tera::Context;
@@ -126,7 +124,7 @@ impl Publisher {
 
     pub fn analytics_expense_by_category(
         self,
-        totals: BTreeMap<String, BTreeMap<String, i64>>,
+        totals: std::collections::HashMap<String, std::collections::HashMap<String, i64>>,
     ) -> Response {
         let mut context = Context::new();
         context.insert("pagenav", &true);
