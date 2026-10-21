@@ -16,16 +16,16 @@ CREATE TABLE categories (
     description TEXT UNIQUE NOT NULL
 );
 
-INSERT INTO categories (name, description) VALUES
-('grocery', 'accounts related to grocery transactions'),
-('utility', 'accounts related to utility transactions');
+INSERT INTO categories (id, name, description) VALUES
+(1, 'none', 'default category for non expense accounts');
 
 CREATE TABLE accounts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
     currency INTEGER NOT NULL REFERENCES currencies(id) ON DELETE RESTRICT,
     balance INTEGER NOT NULL,
-    account_type INTEGER NOT NULL
+    account_type INTEGER NOT NULL,
+    category INTEGER REFERENCES categories(id) ON DELETE RESTRICT
 );
 
 CREATE TABLE transactions (

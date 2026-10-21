@@ -18,6 +18,8 @@ pub enum HydrateAccountError {
     InvalidCurrency(#[from] domain::HydrateCurrencyError),
     #[error("No account type could be hydrated from the provided account type information.")]
     InvalidAccountType(#[from] domain::HydrateAccountTypeError),
+    #[error("Failed to hydrate a Category domain object from the given inputs.")]
+    InvalidCategory(#[from] domain::CategoryHydrateError),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -37,6 +39,7 @@ pub struct NewAccount {
     name: String,
     currency: domain::Currency,
     account_type: domain::AccountType,
+    category: domain::Category,
 }
 
 #[derive(Serialize, Clone)]
@@ -46,6 +49,7 @@ pub struct Account {
     currency: domain::Currency,
     balance: i64,
     account_type: domain::AccountType,
+    category: domain::Category,
 }
 
 #[derive(Serialize)]
@@ -110,6 +114,10 @@ impl AccountID {
 }
 
 impl NewAccount {
+    pub fn category(&self) -> &domain::Category {
+        &self.category
+    }
+
     pub fn name(&self) -> &str {
         &self.name
     }
@@ -118,6 +126,7 @@ impl NewAccount {
         name: String,
         currency: domain::Currency,
         account_type: domain::AccountType,
+        category: domain::Category,
     ) -> Result<Self, CreateNewAccountError> {
         if name.is_empty() {
             return Err(CreateNewAccountError::InvalidName);
@@ -127,6 +136,7 @@ impl NewAccount {
             name,
             currency,
             account_type,
+            category,
         })
     }
 
@@ -161,6 +171,9 @@ impl Account {
         currency_symbol: String,
         balance: i64,
         account_type_id: i64,
+        category_id: i64,
+        category_name: String,
+        category_description: String,
     ) -> Result<Self, HydrateAccountError> {
         if id <= 0 {
             return Err(HydrateAccountError::InvalidID);
@@ -177,12 +190,16 @@ impl Account {
 
         let account_type = domain::AccountType::hydrate(account_type_id)?;
 
+        let category =
+            domain::Category::try_hydrate(category_id, category_name, category_description)?;
+
         Ok(Self {
             id,
             name,
             currency,
             balance,
             account_type,
+            category,
         })
     }
 
@@ -235,6 +252,7 @@ impl Account {
             currency: self.currency,
             balance: self.balance,
             account_type: self.account_type,
+            category: self.category,
         }
     }
 }

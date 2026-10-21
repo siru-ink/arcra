@@ -185,6 +185,9 @@ impl Transaction {
         credit_account_currency_symbol: String,
         credit_account_balance: i64,
         credit_account_account_type: i64,
+        credit_account_category_id: i64,
+        credit_account_category_name: String,
+        credit_account_category_description: String,
         credit_amount: i64,
         debit_account_id: i64,
         debit_account_name: String,
@@ -194,6 +197,9 @@ impl Transaction {
         debit_account_currency_symbol: String,
         debit_account_balance: i64,
         debit_account_account_type: i64,
+        debit_account_category_id: i64,
+        debit_account_category_name: String,
+        debit_account_category_description: String,
         debit_amount: i64,
     ) -> Result<Self, HydrateTransactionError> {
         if id <= 0 {
@@ -211,6 +217,9 @@ impl Transaction {
             credit_account_currency_symbol,
             credit_account_balance,
             credit_account_account_type,
+            credit_account_category_id,
+            credit_account_category_name,
+            credit_account_category_description,
         )
         .map_err(|e| HydrateTransactionError::InvalidCreditAccount(e))?;
 
@@ -223,6 +232,9 @@ impl Transaction {
             debit_account_currency_symbol,
             debit_account_balance,
             debit_account_account_type,
+            debit_account_category_id,
+            debit_account_category_name,
+            debit_account_category_description,
         )
         .map_err(|e| HydrateTransactionError::InvalidDebitAccount(e))?;
 

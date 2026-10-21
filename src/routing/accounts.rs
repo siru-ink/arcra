@@ -36,10 +36,12 @@ pub async fn get_create_account(
         flash.set("Failed to load all currencies.".to_string());
         return Redirect::to("/").into_response();
     };
-
     let account_types = domain::AccountType::list_all();
-
-    publisher.account_create_page(currencies, account_types)
+    let Ok(categories) = butler.list_all_categories().await else {
+        flash.set("Failed to load all categories.".to_string());
+        return Redirect::to("/").into_response();
+    };
+    publisher.account_create_page(currencies, account_types, categories)
 }
 
 #[derive(Deserialize)]
@@ -47,6 +49,7 @@ pub struct AccountCreateForm {
     name: String,
     currency: i64,
     account_type: String,
+    category: i64,
 }
 
 pub async fn post_create_account(
@@ -56,7 +59,12 @@ pub async fn post_create_account(
     form: Form<AccountCreateForm>,
 ) -> Response {
     if let Err(e) = butler
-        .new_account(form.name.clone(), form.currency, &form.account_type)
+        .new_account(
+            form.name.clone(),
+            form.currency,
+            &form.account_type,
+            form.category,
+        )
         .await
     {
         #[cfg(debug_assertions)]

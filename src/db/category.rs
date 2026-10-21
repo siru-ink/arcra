@@ -144,9 +144,10 @@ impl crate::db::Db {
     pub async fn list_all_categories(
         conn: &mut sqlx::SqliteConnection,
     ) -> Result<Vec<domain::Category>, ListAllCategoriesError> {
-        let categories_rows = sqlx::query_as!(CategoryRow, "SELECT * FROM categories")
-            .fetch_all(conn)
-            .await?;
+        let categories_rows =
+            sqlx::query_as!(CategoryRow, "SELECT * FROM categories WHERE id != 1")
+                .fetch_all(conn)
+                .await?;
 
         let categories = categories_rows
             .into_iter()

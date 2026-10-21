@@ -88,12 +88,14 @@ impl Publisher {
         self,
         currencies: Vec<domain::Currency>,
         account_types: Vec<domain::AccountType>,
+        categories: Vec<domain::Category>,
     ) -> Response {
         let mut context = Context::new();
 
         context.insert("pagenav", &true);
         context.insert("currencies", &currencies);
         context.insert("account_types", &account_types);
+        context.insert("categories", &categories);
 
         match self.tera.render("account_create.html", &context) {
             Ok(page) => Html(page).into_response(),
