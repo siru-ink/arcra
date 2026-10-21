@@ -150,8 +150,20 @@ impl NewAccount {
 }
 
 impl Account {
+    pub fn account_type(&self) -> domain::AccountType {
+        self.account_type
+    }
+
     pub fn balance(&self) -> i64 {
         self.balance
+    }
+
+    pub fn category(&self) -> &domain::Category {
+        &self.category
+    }
+
+    pub fn currency(&self) -> &domain::Currency {
+        &self.currency
     }
 
     pub fn currency_id(&self) -> i64 {

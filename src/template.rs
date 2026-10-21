@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use crate::domain;
 use axum::response::{Html, IntoResponse, Response};
 use tera::Context;
@@ -124,6 +126,25 @@ impl Publisher {
         match self.tera.render("account_modify.html", &context) {
             Ok(page) => Html(page).into_response(),
             Err(e) => self.error_page("Tera failed to render <account_modify.html> template", e),
+        }
+    }
+
+    pub fn analytics_expense_by_category(
+        self,
+        totals: BTreeMap<String, BTreeMap<String, i64>>,
+    ) -> Response {
+        let mut context = Context::new();
+        context.insert("pagenav", &true);
+        context.insert("totals", &totals);
+        match self
+            .tera
+            .render("analytics_expense_by_category.html", &context)
+        {
+            Ok(page) => Html(page).into_response(),
+            Err(e) => self.error_page(
+                "Tera failed to render <analytics_expense_by_category.html> template",
+                e,
+            ),
         }
     }
 

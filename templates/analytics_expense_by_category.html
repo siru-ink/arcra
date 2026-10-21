@@ -1,0 +1,19 @@
+{% extends '_base.html' %}
+
+{% block title %}Analytics | {% endblock title %}
+
+{% block content %}
+<h2>Analytics: Expenses by Categories</h2>
+<ul>
+    {% for category,currencies in totals %}
+    <li>
+        {{ category }}
+        <ul>
+            {% for symbol,amount in currencies %}
+            <li>{{ symbol }} {{ amount }}</li>
+            {% endfor %}
+        </ul>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock content %}

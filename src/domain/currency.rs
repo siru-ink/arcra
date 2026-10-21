@@ -36,7 +36,7 @@ pub struct NewCurrency {
     symbol: String,
 }
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Clone, PartialEq, Eq, Hash)]
 pub struct Currency {
     id: i64,
     name: String,

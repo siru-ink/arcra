@@ -11,6 +11,7 @@ use axum::{
 use std::sync::Arc;
 
 mod accounts;
+mod analytics;
 mod auth;
 mod categories;
 mod currencies;
@@ -69,6 +70,10 @@ pub fn get() -> Router<Arc<AppState>> {
         .route(
             "/categories/delete",
             routing::get(categories::get_delete).post(categories::post_delete),
+        )
+        .route(
+            "/analytics/expense_by_category",
+            routing::get(analytics::get_expense_by_category),
         )
 }
 
