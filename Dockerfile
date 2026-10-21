@@ -35,4 +35,4 @@ ENTRYPOINT ["/arcra"]
 EXPOSE 80
 ENV HEALTHCHECK_PORT=80
 ENV HEALTHCHECK_PATH=healthcheck
-HEALTHCHECK --start-period=10s CMD ["/graka"]
+HEALTHCHECK --start-period=10s --interval=5m CMD ["/graka"]
