@@ -97,9 +97,23 @@ impl crate::services::Butler {
         }
     }
 
+    pub async fn get_currency_exchange_account(
+        &self,
+        currency: domain::Currency,
+    ) -> Result<domain::Account, ReadAccountError> {
+        let mut conn = self.dbase.acquire().await?;
+        let exchange_accounts = db::Db::read_all_exchange_accounts_only(&mut conn).await?;
+        for account in exchange_accounts {
+            if *account.currency() == currency {
+                return Ok(account);
+            }
+        }
+        Err(ReadAccountError::NoAccountFound)
+    }
+
     pub async fn list_all_accounts(&self) -> Result<Vec<domain::Account>, ListAllAccountsError> {
         let mut conn = self.dbase.acquire().await?;
-        let accounts = db::Db::read_all_accounts(&mut conn).await?;
+        let accounts = db::Db::read_all_non_exchange_accounts(&mut conn).await?;
         Ok(accounts)
     }
 

@@ -156,4 +156,14 @@ impl crate::db::Db {
 
         Ok(categories)
     }
+
+    pub async fn read_null_category(
+        conn: &mut sqlx::SqliteConnection,
+    ) -> Result<domain::Category, ReadCategoryError> {
+        let category_row = sqlx::query_as!(CategoryRow, "SELECT * FROM categories WHERE id = 1")
+            .fetch_one(conn)
+            .await?;
+
+        Ok(category_row.try_into()?)
+    }
 }

@@ -28,6 +28,10 @@ pub enum CreateNewTransactionError {
     DBUpdateCreditAccountFailed(db::UpdateAccountError),
     #[error("Failed to update the balance in the debit account record in the database.")]
     DBUpdateDebitAccountFailed(db::UpdateAccountError),
+    #[error(
+        "Failed to load a currency exchange account for multi-currency transaction processing."
+    )]
+    ExchangeAccountNotFound(#[from] crate::services::ReadAccountError),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -158,15 +162,48 @@ impl crate::services::Butler {
             return Err(CreateNewTransactionError::DBUpdateDebitAccountFailed(e));
         };
 
-        let new_transaction = domain::NewTransaction::new(
-            description,
-            credit_account,
-            actual_credit_amount,
-            debit_account,
-            actual_debit_amount,
-        )?;
+        let transaction: domain::Transaction;
+        if credit_account.currency() != debit_account.currency() {
+            let credit_exchange_account = self
+                .get_currency_exchange_account(credit_account.currency().clone())
+                .await?;
+            let new_credit_transaction = domain::NewTransaction::new(
+                format!("Mult. Curr. 1 Cr: {}", description),
+                credit_account,
+                actual_credit_amount,
+                credit_exchange_account,
+                actual_credit_amount,
+            )?;
 
-        let transaction = db::Db::create_transaction(&mut conn, new_transaction).await?;
+            let _credit_transaction =
+                db::Db::create_transaction(&mut conn, new_credit_transaction).await?;
+
+            let debit_exchange_account = self
+                .get_currency_exchange_account(debit_account.currency().clone())
+                .await?;
+            let new_debit_transaction = domain::NewTransaction::new(
+                format!("Mult. Curr. 2 Db: {}", description),
+                debit_account,
+                actual_debit_amount,
+                debit_exchange_account,
+                actual_debit_amount,
+            )?;
+
+            let debit_transaction =
+                db::Db::create_transaction(&mut conn, new_debit_transaction).await?;
+
+            transaction = debit_transaction
+        } else {
+            let new_transaction = domain::NewTransaction::new(
+                description,
+                credit_account,
+                actual_credit_amount,
+                debit_account,
+                actual_debit_amount,
+            )?;
+
+            transaction = db::Db::create_transaction(&mut conn, new_transaction).await?;
+        }
 
         if let Err(e) = conn.commit().await {
             return Err(CreateNewTransactionError::DBSqlTransactionCommitFailed(e));

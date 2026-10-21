@@ -5,6 +5,7 @@ mod currency;
 mod session;
 mod transactions;
 
+pub use account::ReadAccountError;
 pub use category::ServiceCategoryUpdateDataError;
 pub use transactions::ListAllTransactionsError;
 

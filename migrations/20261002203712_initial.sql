@@ -5,10 +5,10 @@ CREATE TABLE currencies (
     symbol TEXT NOT NULL
 );
 
-INSERT INTO currencies (name, descriptor, symbol) VALUES
-('EUR', 'euro', '€'),
-('USD', 'united states dollar', '$'),
-('CNY', 'renminbi', '¥');
+-- INSERT INTO currencies (name, descriptor, symbol) VALUES
+-- ('EUR', 'euro', '€'),
+-- ('USD', 'united states dollar', '$'),
+-- ('CNY', 'renminbi', '¥');
 
 CREATE TABLE categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

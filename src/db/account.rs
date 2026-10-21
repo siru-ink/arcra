@@ -167,7 +167,7 @@ impl Db {
         Ok(())
     }
 
-    pub async fn read_all_accounts(
+    pub async fn read_all_non_exchange_accounts(
         conn: &mut SqliteConnection,
     ) -> Result<Vec<domain::Account>, ReadAccountError> {
         let account_rows = sqlx::query_as!(
@@ -186,7 +186,43 @@ impl Db {
                  ca.description as category_description
              FROM accounts a
              JOIN currencies cu on a.currency = cu.id
-             JOIN categories ca on a.category = ca.id"
+             JOIN categories ca on a.category = ca.id
+             WHERE a.account_type != ?",
+            domain::AccountType::CurrencyExchange.id(),
+        )
+        .fetch_all(conn)
+        .await?;
+
+        let accounts: Vec<domain::Account> = account_rows
+            .into_iter()
+            .map(domain::Account::try_from)
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(accounts)
+    }
+
+    pub async fn read_all_exchange_accounts_only(
+        conn: &mut SqliteConnection,
+    ) -> Result<Vec<domain::Account>, ReadAccountError> {
+        let account_rows = sqlx::query_as!(
+            AccountRow,
+            "SELECT
+                 a.id as id,
+                 a.name as name,
+                 cu.id as currency_id,
+                 cu.name as currency_name,
+                 cu.descriptor as currency_descriptor,
+                 cu.symbol as currency_symbol,
+                 a.balance as balance,
+                 a.account_type as account_type,
+                 ca.id as category_id,
+                 ca.name as category_name,
+                 ca.description as category_description
+             FROM accounts a
+             JOIN currencies cu on a.currency = cu.id
+             JOIN categories ca on a.category = ca.id
+             WHERE a.account_type = ?",
+            domain::AccountType::CurrencyExchange.id(),
         )
         .fetch_all(conn)
         .await?;

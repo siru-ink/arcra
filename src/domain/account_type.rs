@@ -13,6 +13,7 @@ pub enum AccountType {
     Equity,
     Liability,
     Revenue,
+    CurrencyExchange,
 }
 
 impl TryFrom<&str> for AccountType {
@@ -25,6 +26,7 @@ impl TryFrom<&str> for AccountType {
             "Equity" => Ok(AccountType::Equity),
             "Liability" => Ok(AccountType::Liability),
             "Revenue" => Ok(AccountType::Revenue),
+            "CurrencyExchange" => Ok(AccountType::CurrencyExchange),
             _ => Err(HydrateAccountTypeError::InvalidId),
         }
     }
@@ -42,11 +44,13 @@ impl AccountType {
             3 => Ok(AccountType::Equity),
             4 => Ok(AccountType::Liability),
             5 => Ok(AccountType::Revenue),
+            6 => Ok(AccountType::CurrencyExchange),
             _ => Err(HydrateAccountTypeError::InvalidId),
         }
     }
 
     pub fn list_all() -> Vec<AccountType> {
+        // Intentionally leaving out CurrencyExchange due to it being an internal only account type
         vec![
             AccountType::Asset,
             AccountType::Expense,

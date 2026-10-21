@@ -21,9 +21,11 @@ impl crate::services::Butler {
 
         for tx in transactions {
             if tx.credit_account().currency() != tx.debit_account().currency() {
-                // ignore multi-currency tx that will not be balanced
-                // todo! change how multi currency tx are recorded in database
-                continue;
+                // Multi-currency transactions are split into two single-currency
+                // transactions automatically on save, so if there are any
+                // multi-currency transactions, this should panic because the server
+                // is in an unrecoverable, failed state
+                panic!("There is a multi-currency transaction in the database.");
             }
             *debit_totals
                 .entry(tx.debit_account().currency().clone())

@@ -7,7 +7,15 @@ pub enum CreateCurrencyError {
     #[error("Failed to obtain a connection to the database.")]
     DBConnectionFailed(#[from] sqlx::Error),
     #[error("Failed to create a new currency record in the database.")]
-    DBCreateError(#[from] db::CreateCurrencyError),
+    DBCreateCurrencyError(#[from] db::CreateCurrencyError),
+    #[error("Failed to read the 'null' category record from database.")]
+    DBReadNullCategoryFailed(#[from] db::ReadCategoryError),
+    #[error("Failed to construct a NewAccount domain object from provided inputs.")]
+    ConstructNewAccountObjectFailed(#[from] domain::CreateNewAccountError),
+    #[error("Failed to commit/write the sql transaction to database.")]
+    SqlTransactionCommitFailed(sqlx::Error),
+    #[error("Failed to create a new account record in database.")]
+    DBCreateExchangeAccountError(#[from] db::CreateAccountError),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -36,8 +44,19 @@ impl crate::services::Butler {
         symbol: String,
     ) -> Result<domain::Currency, CreateCurrencyError> {
         let new_currency = domain::NewCurrency::new(name, descriptor, symbol)?;
-        let mut conn = self.dbase.acquire().await?;
+        let mut conn = self.dbase.begin().await?;
         let currency = db::Db::create_currency(&mut conn, new_currency).await?;
+        let null_category = db::Db::read_null_category(&mut conn).await?;
+        let new_exchange_account = domain::NewAccount::new(
+            format!("{}_exchange", currency.name()),
+            currency.clone(),
+            domain::AccountType::CurrencyExchange,
+            null_category,
+        )?;
+        let _exchange_account = db::Db::create_account(&mut conn, new_exchange_account).await?;
+        if let Err(e) = conn.commit().await {
+            return Err(CreateCurrencyError::SqlTransactionCommitFailed(e));
+        }
         Ok(currency)
     }
 

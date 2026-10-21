@@ -63,7 +63,11 @@ pub async fn post_create(
         .await
     {
         Ok(_) => flash.set("Transaction saved successfully.".to_string()),
-        Err(_) => flash.set("Transaction could not be saved.".to_string()),
+        Err(e) => {
+            #[cfg(debug_assertions)]
+            eprintln!("Error in transactions::post_create handler: {}", e);
+            flash.set("Transaction could not be saved.".to_string());
+        }
     }
 
     Redirect::to("/transactions/list").into_response()
