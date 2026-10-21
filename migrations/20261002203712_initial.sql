@@ -5,11 +5,6 @@ CREATE TABLE currencies (
     symbol TEXT NOT NULL
 );
 
--- INSERT INTO currencies (name, descriptor, symbol) VALUES
--- ('EUR', 'euro', '€'),
--- ('USD', 'united states dollar', '$'),
--- ('CNY', 'renminbi', '¥');
-
 CREATE TABLE categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
@@ -25,7 +20,7 @@ CREATE TABLE accounts (
     currency INTEGER NOT NULL REFERENCES currencies(id) ON DELETE RESTRICT,
     balance INTEGER NOT NULL,
     account_type INTEGER NOT NULL,
-    category INTEGER REFERENCES categories(id) ON DELETE RESTRICT
+    category INTEGER NOT NULL REFERENCES categories(id) ON DELETE RESTRICT
 );
 
 CREATE TABLE transactions (
