@@ -6,7 +6,7 @@ pub enum HydrateAccountTypeError {
     InvalidId,
 }
 
-#[derive(Clone, Copy, Serialize, PartialEq, Eq)]
+#[derive(Clone, Copy, Serialize, PartialEq, Eq, Hash)]
 pub enum AccountType {
     Asset = 1,
     Expense,

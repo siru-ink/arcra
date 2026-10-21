@@ -75,6 +75,10 @@ pub fn get() -> Router<Arc<AppState>> {
             "/analytics/expense_by_category",
             routing::get(analytics::get_expense_by_category),
         )
+        .route(
+            "/analytics/check_accounting_equation",
+            routing::get(analytics::get_check_accounting_equation),
+        )
 }
 
 async fn get_index(publisher: Publisher, flash: Flash, _session: Session) -> Response {

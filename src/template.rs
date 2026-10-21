@@ -122,6 +122,22 @@ impl Publisher {
         }
     }
 
+    pub fn analytics_check_accounting_equation_page(self, balanced: bool) -> Response {
+        let mut context = Context::new();
+        context.insert("pagenav", &true);
+        context.insert("balanced", &balanced);
+        match self
+            .tera
+            .render("analytics_check_accounting_equation.html", &context)
+        {
+            Ok(page) => Html(page).into_response(),
+            Err(e) => self.error_page(
+                "Tera failed to render <analytics_check_accounting_equation.html> template",
+                e,
+            ),
+        }
+    }
+
     pub fn analytics_expense_by_category(
         self,
         totals: std::collections::HashMap<String, std::collections::HashMap<String, i64>>,

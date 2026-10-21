@@ -1,0 +1,12 @@
+{% extends '_base.html' %}
+
+{% block title %}Analytics | {% endblock title %}
+
+{% block content %}
+<h2>Analytics: Check Accounting Equation</h2>
+{% if balanced %}
+    <p>The accounting equation is balanced.</p>
+{% else %}
+    <p>The accounting equation is out of balance. Please check the transaction log for errors.</p>
+{% endif %}
+{% endblock content %}
