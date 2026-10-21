@@ -30,7 +30,7 @@ pub enum ListAllCurrenciesError {
 
 impl crate::services::Butler {
     pub async fn create_currency(
-        self,
+        &self,
         name: String,
         descriptor: String,
         symbol: String,
@@ -41,7 +41,7 @@ impl crate::services::Butler {
         Ok(currency)
     }
 
-    pub async fn drop_currency(self, id: i64) -> Result<(), DropCurrencyError> {
+    pub async fn drop_currency(&self, id: i64) -> Result<(), DropCurrencyError> {
         let currency_id = domain::CurrencyID::new(id)?;
         let mut conn = self.dbase.acquire().await?;
         db::Db::delete_currency(&mut conn, currency_id).await?;
@@ -49,7 +49,7 @@ impl crate::services::Butler {
     }
 
     pub async fn list_all_currencies(
-        self,
+        &self,
     ) -> Result<Vec<domain::Currency>, ListAllCurrenciesError> {
         let mut conn = self.dbase.acquire().await?;
         let currencies = db::Db::read_all_currencies(&mut conn).await?;
