@@ -69,6 +69,74 @@ pub async fn post_create(
     match butler
         .new_transaction(
             description,
+            None,
+            credit_account,
+            debit_account,
+            credit_amount,
+            debit_amount,
+            category_id,
+        )
+        .await
+    {
+        Ok(_) => flash.set("Transaction saved successfully.".to_string()),
+        Err(e) => {
+            #[cfg(debug_assertions)]
+            eprintln!("Error in transactions::post_create handler: {}", e);
+            flash.set("Transaction could not be saved.".to_string());
+        }
+    }
+
+    Redirect::to("/transactions/list").into_response()
+}
+
+pub async fn get_create_with_date(
+    butler: Butler,
+    publisher: Publisher,
+    _session: Session,
+    flash: Flash,
+) -> Response {
+    let Ok(accounts) = butler.list_all_accounts().await else {
+        flash.set("Could not retrieve list of accounts.".to_string());
+        return Redirect::to("/").into_response();
+    };
+    let Ok(categories) = butler.list_all_categories().await else {
+        flash.set("Could not retrieve list of categories.".to_string());
+        return Redirect::to("/").into_response();
+    };
+    publisher.transaction_create_with_date_page(accounts, categories, flash.message())
+}
+
+#[derive(Deserialize)]
+pub struct TransactionCreateWithDateForm {
+    description: String,
+    date: String,
+    credit_account: i64,
+    credit_amount: f64,
+    debit_account: i64,
+    debit_amount: Option<f64>,
+    category_id: Option<i64>,
+}
+
+pub async fn post_create_with_date(
+    butler: Butler,
+    flash: Flash,
+    _session: Session,
+    Form(form): Form<TransactionCreateWithDateForm>,
+) -> Response {
+    let TransactionCreateWithDateForm {
+        description,
+        date,
+        credit_account,
+        credit_amount,
+        debit_account,
+        debit_amount,
+        category_id,
+    } = form;
+
+    match butler
+        .new_transaction(
+            description,
+            Some(date),
             credit_account,
             debit_account,
             credit_amount,

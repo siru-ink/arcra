@@ -1,3 +1,5 @@
+use chrono::NaiveTime;
+
 use crate::{db, domain};
 
 #[derive(Debug, thiserror::Error)]
@@ -38,6 +40,8 @@ pub enum CreateNewTransactionError {
     CategoryIDNotProvided,
     #[error("Could not convert provided data into a CategoryID domain object.")]
     CreateCategoryIDFailed(#[from] domain::CategoryIDConstructorError),
+    #[error("Failed to parse provided date into valid chrono::DateTime object.")]
+    DateConversionFailed,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -127,6 +131,7 @@ impl crate::services::Butler {
     pub async fn new_transaction(
         &self,
         description: String,
+        date: Option<String>,
         credit_account_id: i64,
         debit_account_id: i64,
         credit_amount: f64,
@@ -136,6 +141,15 @@ impl crate::services::Butler {
         if credit_account_id == debit_account_id {
             return Err(CreateNewTransactionError::AccountsMustDiffer);
         }
+
+        let datetime = match date {
+            Some(date) => chrono::NaiveDate::parse_from_str(&date, "%Y-%m-%d")
+                .map_err(|_| CreateNewTransactionError::DateConversionFailed)?
+                .and_time(NaiveTime::MIN)
+                .and_utc(),
+            None => chrono::Utc::now(),
+        };
+
         let credit_account_id = domain::AccountID::try_from(credit_account_id)
             .map_err(CreateNewTransactionError::InvalidCreditAccountID)?;
         let debit_account_id = domain::AccountID::try_from(debit_account_id)
@@ -188,6 +202,7 @@ impl crate::services::Butler {
                 .await?;
             let new_credit_transaction = domain::NewTransaction::new(
                 format!("Mult. Curr. 1 Cr: {}", description),
+                datetime,
                 credit_account,
                 actual_credit_amount,
                 credit_exchange_account,
@@ -203,6 +218,7 @@ impl crate::services::Butler {
                 .await?;
             let new_debit_transaction = domain::NewTransaction::new(
                 format!("Mult. Curr. 2 Db: {}", description),
+                datetime,
                 debit_account,
                 actual_debit_amount,
                 debit_exchange_account,
@@ -217,6 +233,7 @@ impl crate::services::Butler {
         } else {
             let new_transaction = domain::NewTransaction::new(
                 description,
+                datetime,
                 credit_account,
                 actual_credit_amount,
                 debit_account,

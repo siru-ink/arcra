@@ -306,6 +306,34 @@ impl Publisher {
         }
     }
 
+    pub fn transaction_create_with_date_page(
+        self,
+        accounts: Vec<domain::Account>,
+        categories: Vec<domain::Category>,
+        flash: Option<String>,
+    ) -> Response {
+        let mut context = Context::new();
+
+        context.insert("pagenav", &true);
+        context.insert("accounts", &accounts);
+        context.insert("categories", &categories);
+
+        if let Some(message) = flash {
+            context.insert("flash", &message);
+        }
+
+        match self
+            .tera
+            .render("transaction_create_with_date.html", &context)
+        {
+            Ok(page) => Html(page).into_response(),
+            Err(e) => self.error_page(
+                "Tera failed to render <transaction_create_with_date.html> template.",
+                e,
+            ),
+        }
+    }
+
     pub fn transaction_delete_page(self, transaction: domain::Transaction) -> Response {
         let mut context = Context::new();
 

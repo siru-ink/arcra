@@ -54,6 +54,11 @@ pub fn get() -> Router<Arc<AppState>> {
             routing::get(transactions::get_create).post(transactions::post_create),
         )
         .route(
+            "/transactions/create_with_date",
+            routing::get(transactions::get_create_with_date)
+                .post(transactions::post_create_with_date),
+        )
+        .route(
             "/transactions/delete",
             routing::get(transactions::get_delete).post(transactions::post_delete),
         )

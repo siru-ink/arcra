@@ -106,6 +106,7 @@ impl NewTransaction {
 
     pub fn new(
         description: String,
+        time: chrono::DateTime<chrono::Utc>,
         credit_account: domain::Account,
         credit_amount: i64,
         debit_account: domain::Account,
@@ -122,7 +123,7 @@ impl NewTransaction {
 
         Ok(Self {
             description,
-            time: chrono::Utc::now(),
+            time,
             credit_account,
             credit_amount,
             debit_account,

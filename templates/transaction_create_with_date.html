@@ -1,0 +1,116 @@
+{% extends '_base.html' %}
+
+{% block title %}Record Transaction With Date | {% endblock title %}
+
+{% block content %}
+<h2>Record Transaction with Date</h2>
+<form method="post" action="/transactions/create_with_date">
+    <label for="description">Description:</label>
+    <input type="text" name="description" id="description" placeholder="grocery/shopping/education..." required />
+    <br />
+    <label for="date">Date:</label>
+    <input type="date" name="date" id="date" required />
+    <br />
+    <label for="credit_account">Credit Account:</label>
+    <span id="credit_currency"></span>
+    <select name="credit_account" id="credit_account" required>
+        <option value="" data-currency="..." selected disabled>--Please choose--</option>
+        {% for account in accounts %}
+        <option value="{{ account.id }}" data-currency="{{ account.currency.symbol }}">{{ account.name }}</option>
+        {% endfor %}
+    </select>
+    <br />
+    <label for="credit_amount">Credit Amount:</label>
+    <input type="number" name="credit_amount" id="credit_amount" step="0.01" min="0" required />
+    <br />
+    <label for="debit_account">Debit Account:</label>
+    <span id="debit_currency"></span>
+    <select name="debit_account" id="debit_account" required>
+        <option value="" data-currency="..." data-accounttype="none" selected disabled>--Please choose--</option>
+        {% for account in accounts %}
+        <option value="{{ account.id }}" data-currency="{{ account.currency.symbol }}" data-accounttype="{{ account.account_type }}">{{ account.name }}</option>
+        {% endfor %}
+    </select>
+    <br />
+    <div id="debit_amount_group">
+        <label for="debit_amount">Debit Amount:</label>
+        <input type="number" name="debit_amount" id="debit_amount" step="0.01" min="0" required />
+        <br />
+    </div>
+    <div id="category_group">
+        <label for="category_select">Expense Category:</label>
+        <select name="category_id" id="category_select">
+            <option value="1" selected disabled>--Please choose--</option>
+            {% for category in categories %}
+            <option value="{{ category.id }}">{{ category.name }}</option>
+            {% endfor %}
+        </select>
+        <br />
+    </div>
+    <button type="submit">Record</button>
+</form>
+
+<script>
+  (function () {
+    const creditAccount = document.getElementById("credit_account");
+    const debitAccount = document.getElementById("debit_account");
+    const creditDisplay = document.getElementById("credit_currency");
+    const debitDisplay = document.getElementById("debit_currency");
+    const debitAmountGroup = document.getElementById("debit_amount_group");
+    const debitAmountInput = document.getElementById("debit_amount");
+
+    function getCurrency(account) {
+      if (!account || account.selectedIndex < 0) {
+        return "...";
+      }
+      return account.options[account.selectedIndex].dataset.currency;
+    }
+
+    function updateCurrencyDisplay(display, currency) {
+      display.textContent = currency;
+    }
+
+    function updateAll() {
+      const creditCurrency = getCurrency(creditAccount);
+      const debitCurrency = getCurrency(debitAccount);
+
+      updateCurrencyDisplay(creditDisplay, creditCurrency);
+      updateCurrencyDisplay(debitDisplay, debitCurrency);
+
+      if (creditCurrency === "..." || debitCurrency === "...") {
+        debitAmountGroup.style.display = "none";
+        debitAmountInput.required = false;
+      } else if (creditCurrency === debitCurrency) {
+        debitAmountGroup.style.display = "none";
+        debitAmountInput.required = false;
+      } else {
+        debitAmountGroup.style.display = "block";
+        debitAmountInput.required = true;
+      }
+    }
+
+    updateAll();
+
+    creditAccount.addEventListener("change", updateAll);
+    debitAccount.addEventListener("change", updateAll);
+
+    const categorySelectGroup = document.getElementById('category_group');
+    const categorySelectInput = document.getElementById('category_select');
+
+    function updateCategory() {
+      let selectedAccountType = debitAccount.options[debitAccount.selectedIndex].dataset.accounttype;
+      if (selectedAccountType === "Expense") {
+        categorySelectGroup.style.display = "block";
+        categorySelectInput.required = true;
+      } else {
+        categorySelectGroup.style.display = "none";
+        categorySelectInput.required = false;
+      }
+    }
+
+    updateCategory();
+
+    debitAccount.addEventListener("change", updateCategory);
+  })();
+</script>
+{% endblock content %}
