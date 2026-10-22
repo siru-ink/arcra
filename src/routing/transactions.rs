@@ -117,12 +117,11 @@ pub struct TransactionCreateWithDateForm {
     category_id: Option<i64>,
 }
 
-pub async fn post_create_with_date(
+async fn post_create_with_date_helper(
     butler: Butler,
     flash: Flash,
-    _session: Session,
-    Form(form): Form<TransactionCreateWithDateForm>,
-) -> Response {
+    form: TransactionCreateWithDateForm,
+) {
     let TransactionCreateWithDateForm {
         description,
         date,
@@ -152,8 +151,26 @@ pub async fn post_create_with_date(
             flash.set("Transaction could not be saved.".to_string());
         }
     }
+}
 
+pub async fn post_create_with_date(
+    butler: Butler,
+    flash: Flash,
+    _session: Session,
+    Form(form): Form<TransactionCreateWithDateForm>,
+) -> Response {
+    post_create_with_date_helper(butler, flash, form).await;
     Redirect::to("/transactions/list").into_response()
+}
+
+pub async fn post_create_with_date_multiple(
+    butler: Butler,
+    flash: Flash,
+    _session: Session,
+    Form(form): Form<TransactionCreateWithDateForm>,
+) -> Response {
+    post_create_with_date_helper(butler, flash, form).await;
+    Redirect::to("/transactions/create_with_date").into_response()
 }
 
 pub async fn get_delete(
