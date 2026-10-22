@@ -10,12 +10,12 @@
 </div>
 <h2>Analytics: Expenses by Categories</h2>
 <ul>
-    {% for category,currencies in totals %}
+    {% for categories in totals %}
     <li>
-        {{ category }}
+        {{ categories[0] }}
         <ul>
-            {% for symbol,amount in currencies %}
-            <li>{{ symbol }} {{ amount | money }}</li>
+            {% for currencies in categories[1] %}
+            <li>{{ currencies[0] }} {{ currencies[1] | money }}</li>
             {% endfor %}
         </ul>
     </li>

@@ -140,7 +140,7 @@ impl Publisher {
 
     pub fn analytics_expense_by_category(
         self,
-        totals: std::collections::BTreeMap<String, std::collections::BTreeMap<String, i64>>,
+        totals: Vec<(String, Vec<(String, i64)>)>,
     ) -> Response {
         let mut context = Context::new();
         context.insert("pagenav", &true);

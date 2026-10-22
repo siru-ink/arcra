@@ -59,10 +59,7 @@ impl crate::services::Butler {
     pub async fn expense_category_totals(
         &self,
         min_filter: String,
-    ) -> Result<
-        std::collections::BTreeMap<String, std::collections::BTreeMap<String, i64>>,
-        ServiceAnalyticsExpenseCategoryTotalsError,
-    > {
+    ) -> Result<Vec<(String, Vec<(String, i64)>)>, ServiceAnalyticsExpenseCategoryTotalsError> {
         let mut transactions = self.list_all_transactions().await?;
 
         fn start_of_month(dt: DateTime<Utc>) -> DateTime<Utc> {
@@ -90,10 +87,8 @@ impl crate::services::Butler {
 
         let mut conn = self.dbase.acquire().await?;
         let null_category = db::Db::read_null_category(&mut conn).await?;
-        let mut totals: std::collections::BTreeMap<
-            String,
-            std::collections::BTreeMap<String, i64>,
-        > = std::collections::BTreeMap::new();
+        let mut totals: std::collections::HashMap<String, std::collections::HashMap<String, i64>> =
+            std::collections::HashMap::new();
 
         for transaction in transactions {
             let debit_account = transaction.debit_account();
@@ -109,6 +104,17 @@ impl crate::services::Butler {
                 .entry(debit_account.currency().symbol().to_string())
                 .or_default() += transaction.debit_amount();
         }
+
+        let mut totals: Vec<(String, Vec<(String, i64)>)> = totals
+            .into_iter()
+            .map(|(category, currencies)| {
+                let mut inner: Vec<(String, i64)> = currencies.into_iter().collect();
+                inner.sort_by(|a, b| a.0.cmp(&b.0));
+                (category, inner)
+            })
+            .collect();
+
+        totals.sort_by(|a, b| a.0.cmp(&b.0));
 
         Ok(totals)
     }
