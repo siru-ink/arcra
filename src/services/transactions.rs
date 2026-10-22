@@ -124,7 +124,8 @@ impl crate::services::Butler {
         &self,
     ) -> Result<Vec<domain::Transaction>, ListAllTransactionsError> {
         let mut conn = self.dbase.acquire().await?;
-        let transactions = db::Db::read_all_transactions(&mut conn).await?;
+        let mut transactions = db::Db::read_all_transactions(&mut conn).await?;
+        transactions.sort_unstable_by_key(|t| std::cmp::Reverse(t.time()));
         Ok(transactions)
     }
 
