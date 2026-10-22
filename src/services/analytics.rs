@@ -58,14 +58,16 @@ impl crate::services::Butler {
     pub async fn expense_category_totals(
         &self,
     ) -> Result<
-        std::collections::HashMap<String, std::collections::HashMap<String, i64>>,
+        std::collections::BTreeMap<String, std::collections::BTreeMap<String, i64>>,
         ServiceAnalyticsExpenseCategoryTotalsError,
     > {
         let transactions = self.list_all_transactions().await?;
         let mut conn = self.dbase.acquire().await?;
         let null_category = db::Db::read_null_category(&mut conn).await?;
-        let mut totals: std::collections::HashMap<String, std::collections::HashMap<String, i64>> =
-            std::collections::HashMap::new();
+        let mut totals: std::collections::BTreeMap<
+            String,
+            std::collections::BTreeMap<String, i64>,
+        > = std::collections::BTreeMap::new();
 
         for transaction in transactions {
             let debit_account = transaction.debit_account();
