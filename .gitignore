@@ -6,3 +6,6 @@
 
 # Docker build files
 /.sqlx
+
+# Private files
+/migrations/20261022134303_private_setup.sql
