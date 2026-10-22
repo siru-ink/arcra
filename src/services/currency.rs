@@ -46,12 +46,10 @@ impl crate::services::Butler {
         let new_currency = domain::NewCurrency::new(name, descriptor, symbol)?;
         let mut conn = self.dbase.begin().await?;
         let currency = db::Db::create_currency(&mut conn, new_currency).await?;
-        let null_category = db::Db::read_null_category(&mut conn).await?;
         let new_exchange_account = domain::NewAccount::new(
             format!("{}_exchange", currency.name()),
             currency.clone(),
             domain::AccountType::CurrencyExchange,
-            null_category,
         )?;
         let _exchange_account = db::Db::create_account(&mut conn, new_exchange_account).await?;
         if let Err(e) = conn.commit().await {

@@ -24,37 +24,6 @@
         {% endfor %}
     </select>
     <br>
-    <div id="category_select">
-    <label for="category">Expense Category:</label>
-    <select name="category" id="category" >
-        <option selected value="1" >--Please select--</option>
-        {% for category in categories %}
-        <option value="{{ category.id }}">{{ category.name }}</option>
-        {% endfor %}
-    </select>
-    <br>
-    </div>
     <button type="submit">Create</button>
 </form>
-
-<script>
-  (function () {
-    const accountSelect = document.getElementById('account_type');
-    const categoryDiv = document.getElementById('category_select');
-
-    function updateDisplay() {
-      var accountType = accountSelect.value;
-      if (accountType === "Expense") {
-        categoryDiv.style.display = "block"
-      } else {
-        categoryDiv.style.display = "none"
-      }
-    }
-
-    updateDisplay();
-
-    accountSelect.addEventListener("change", updateDisplay);
-
-  })();
-</script>
 {% endblock content %}

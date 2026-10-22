@@ -42,9 +42,6 @@ pub struct TransactionRow {
     credit_account_currency_symbol: String,
     credit_account_balance: i64,
     credit_account_account_type: i64,
-    credit_account_category_id: i64,
-    credit_account_category_name: String,
-    credit_account_category_description: String,
     credit_amount: i64,
     debit_account_id: i64,
     debit_account_name: String,
@@ -54,10 +51,10 @@ pub struct TransactionRow {
     debit_account_currency_symbol: String,
     debit_account_balance: i64,
     debit_account_account_type: i64,
-    debit_account_category_id: i64,
-    debit_account_category_name: String,
-    debit_account_category_description: String,
     debit_amount: i64,
+    category_id: i64,
+    category_name: String,
+    category_description: String,
 }
 
 impl TryFrom<TransactionRow> for domain::Transaction {
@@ -76,9 +73,6 @@ impl TryFrom<TransactionRow> for domain::Transaction {
             value.credit_account_currency_symbol,
             value.credit_account_balance,
             value.credit_account_account_type,
-            value.credit_account_category_id,
-            value.credit_account_category_name,
-            value.credit_account_category_description,
             value.credit_amount,
             value.debit_account_id,
             value.debit_account_name,
@@ -88,10 +82,10 @@ impl TryFrom<TransactionRow> for domain::Transaction {
             value.debit_account_currency_symbol,
             value.debit_account_balance,
             value.debit_account_account_type,
-            value.debit_account_category_id,
-            value.debit_account_category_name,
-            value.debit_account_category_description,
             value.debit_amount,
+            value.category_id,
+            value.category_name,
+            value.category_description,
         )
     }
 }
@@ -102,15 +96,16 @@ impl crate::db::Db {
         transaction: domain::NewTransaction,
     ) -> Result<domain::Transaction, CreateTransactionError> {
         let new_id = sqlx::query!(
-            r#"INSERT INTO transactions (description, time, credit_account, credit_amount, debit_account, debit_amount)
-               VALUES (?, ?, ?, ?, ?, ?)
+            r#"INSERT INTO transactions (description, time, credit_account, credit_amount, debit_account, debit_amount, category)
+               VALUES (?, ?, ?, ?, ?, ?, ?)
                RETURNING id as "id!""#,
             transaction.description(),
             transaction.time(),
             transaction.credit_account().id(),
             transaction.credit_amount(),
             transaction.debit_account().id(),
-            transaction.debit_amount()
+            transaction.debit_amount(),
+            transaction.category().id()
         )
         .fetch_one(&mut *conn)
         .await?
@@ -130,9 +125,6 @@ impl crate::db::Db {
                  ccu.symbol as credit_account_currency_symbol,
                  ca.balance as credit_account_balance,
                  ca.account_type as credit_account_account_type,
-                 cca.id as credit_account_category_id,
-                 cca.name as credit_account_category_name,
-                 cca.description as credit_account_category_description,
                  t.credit_amount as credit_amount,
                  da.id as debit_account_id,
                  da.name as debit_account_name,
@@ -142,17 +134,16 @@ impl crate::db::Db {
                  dcu.symbol as debit_account_currency_symbol,
                  da.balance as debit_account_balance,
                  da.account_type as debit_account_account_type,
-                 dca.id as debit_account_category_id,
-                 dca.name as debit_account_category_name,
-                 dca.description as debit_account_category_description,
-                 t.debit_amount as debit_amount
+                 t.debit_amount as debit_amount,
+                 cat.id as category_id,
+                 cat.name as category_name,
+                 cat.description as category_description
                FROM transactions t
                JOIN accounts ca on t.credit_account = ca.id
                JOIN currencies ccu on ca.currency = ccu.id
-               JOIN categories cca on ca.category = cca.id
                JOIN accounts da on t.debit_account = da.id
                JOIN currencies dcu on da.currency = dcu.id
-               JOIN categories dca on da.category = dca.id
+               JOIN categories cat on t.category = cat.id
                WHERE t.id = ?"#,
             new_id
         )
@@ -180,9 +171,6 @@ impl crate::db::Db {
                  ccu.symbol as credit_account_currency_symbol,
                  ca.balance as credit_account_balance,
                  ca.account_type as credit_account_account_type,
-                 cca.id as credit_account_category_id,
-                 cca.name as credit_account_category_name,
-                 cca.description as credit_account_category_description,
                  t.credit_amount as credit_amount,
                  da.id as debit_account_id,
                  da.name as debit_account_name,
@@ -192,17 +180,16 @@ impl crate::db::Db {
                  dcu.symbol as debit_account_currency_symbol,
                  da.balance as debit_account_balance,
                  da.account_type as debit_account_account_type,
-                 dca.id as debit_account_category_id,
-                 dca.name as debit_account_category_name,
-                 dca.description as debit_account_category_description,
-                 t.debit_amount as debit_amount
+                 t.debit_amount as debit_amount,
+                 cat.id as category_id,
+                 cat.name as category_name,
+                 cat.description as category_description
                FROM transactions t
                JOIN accounts ca on t.credit_account = ca.id
                JOIN currencies ccu on ca.currency = ccu.id
-               JOIN categories cca on ca.category = cca.id
                JOIN accounts da on t.debit_account = da.id
                JOIN currencies dcu on da.currency = dcu.id
-               JOIN categories dca on da.category = dca.id
+               JOIN categories cat on t.category = cat.id
                WHERE t.id = ?"#,
             i64::from(id)
         )
@@ -270,9 +257,6 @@ impl crate::db::Db {
                  ccu.symbol as credit_account_currency_symbol,
                  ca.balance as credit_account_balance,
                  ca.account_type as credit_account_account_type,
-                 cca.id as credit_account_category_id,
-                 cca.name as credit_account_category_name,
-                 cca.description as credit_account_category_description,
                  t.credit_amount as credit_amount,
                  da.id as debit_account_id,
                  da.name as debit_account_name,
@@ -282,17 +266,16 @@ impl crate::db::Db {
                  dcu.symbol as debit_account_currency_symbol,
                  da.balance as debit_account_balance,
                  da.account_type as debit_account_account_type,
-                 dca.id as debit_account_category_id,
-                 dca.name as debit_account_category_name,
-                 dca.description as debit_account_category_description,
-                 t.debit_amount as debit_amount
+                 t.debit_amount as debit_amount,
+                 cat.id as category_id,
+                 cat.name as category_name,
+                 cat.description as category_description
                FROM transactions t
                JOIN accounts ca on t.credit_account = ca.id
                JOIN currencies ccu on ca.currency = ccu.id
-               JOIN categories cca on ca.category = cca.id
                JOIN accounts da on t.debit_account = da.id
                JOIN currencies dcu on da.currency = dcu.id
-               JOIN categories dca on da.category = dca.id"#
+               JOIN categories cat on t.category = cat.id"#
         )
         .fetch_all(conn)
         .await?;

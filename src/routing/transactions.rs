@@ -34,7 +34,11 @@ pub async fn get_create(
         flash.set("Could not retrieve list of accounts.".to_string());
         return Redirect::to("/").into_response();
     };
-    publisher.transaction_create_page(accounts, flash.message())
+    let Ok(categories) = butler.list_all_categories().await else {
+        flash.set("Could not retrieve list of categories.".to_string());
+        return Redirect::to("/").into_response();
+    };
+    publisher.transaction_create_page(accounts, categories, flash.message())
 }
 
 #[derive(Deserialize)]
@@ -44,21 +48,32 @@ pub struct TransactionCreateForm {
     credit_amount: f64,
     debit_account: i64,
     debit_amount: Option<f64>,
+    category_id: Option<i64>,
 }
 
 pub async fn post_create(
     butler: Butler,
     flash: Flash,
     _session: Session,
-    form: Form<TransactionCreateForm>,
+    Form(form): Form<TransactionCreateForm>,
 ) -> Response {
+    let TransactionCreateForm {
+        description,
+        credit_account,
+        credit_amount,
+        debit_account,
+        debit_amount,
+        category_id,
+    } = form;
+
     match butler
         .new_transaction(
-            form.description.clone(),
-            form.credit_account,
-            form.debit_account,
-            form.credit_amount,
-            form.debit_amount,
+            description,
+            credit_account,
+            debit_account,
+            credit_amount,
+            debit_amount,
+            category_id,
         )
         .await
     {

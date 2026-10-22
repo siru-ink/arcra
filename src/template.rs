@@ -284,12 +284,14 @@ impl Publisher {
     pub fn transaction_create_page(
         self,
         accounts: Vec<domain::Account>,
+        categories: Vec<domain::Category>,
         flash: Option<String>,
     ) -> Response {
         let mut context = Context::new();
 
         context.insert("pagenav", &true);
         context.insert("accounts", &accounts);
+        context.insert("categories", &categories);
 
         if let Some(message) = flash {
             context.insert("flash", &message);

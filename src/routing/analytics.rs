@@ -44,7 +44,7 @@ pub async fn get_expense_by_category(
             continue;
         }
         *totals
-            .entry(debit_account.category().name().to_string())
+            .entry(transaction.category().name().to_string())
             .or_default()
             .entry(debit_account.currency().symbol().to_string())
             .or_default() += transaction.debit_amount();

@@ -16,8 +16,6 @@ pub enum CreateAccountError {
     InvalidNewAccount(#[from] domain::CreateNewAccountError),
     #[error("Failed to create a new account in the database.")]
     CreateDBAccountFailed(#[from] db::CreateAccountError),
-    #[error("The provided category id value is not valid for the selected account type.")]
-    InvalidCategoryIDAccountTypeMatchup,
     #[error("Could not convert category_id to CategoryID domain object.")]
     InvalidCategoryID(#[from] domain::CategoryIDConstructorError),
     #[error("Failed to read category information from database.")]
@@ -122,7 +120,6 @@ impl crate::services::Butler {
         name: String,
         currency_id: i64,
         account_type_id: &str,
-        category_id: i64,
     ) -> Result<domain::Account, CreateAccountError> {
         let currency_id = domain::CurrencyID::try_from(currency_id)?;
         let mut conn = self.dbase.acquire().await?;
@@ -130,16 +127,7 @@ impl crate::services::Butler {
             return Err(CreateAccountError::NoCurrencyFound);
         };
         let account_type = domain::AccountType::try_from(account_type_id)?;
-        let category_id = match account_type {
-            domain::AccountType::Expense if category_id > 1 => category_id,
-            domain::AccountType::Expense => {
-                return Err(CreateAccountError::InvalidCategoryIDAccountTypeMatchup);
-            }
-            _ => 1,
-        };
-        let category_id = domain::CategoryID::try_from(category_id)?;
-        let category = db::Db::read_category(&mut conn, category_id).await?;
-        let new_account = domain::NewAccount::new(name, currency, account_type, category)?;
+        let new_account = domain::NewAccount::new(name, currency, account_type)?;
         let account = db::Db::create_account(&mut conn, new_account).await?;
         Ok(account)
     }

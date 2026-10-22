@@ -49,7 +49,6 @@ pub struct AccountCreateForm {
     name: String,
     currency: i64,
     account_type: String,
-    category: i64,
 }
 
 pub async fn post_create_account(
@@ -59,12 +58,7 @@ pub async fn post_create_account(
     form: Form<AccountCreateForm>,
 ) -> Response {
     if let Err(e) = butler
-        .new_account(
-            form.name.clone(),
-            form.currency,
-            &form.account_type,
-            form.category,
-        )
+        .new_account(form.name.clone(), form.currency, &form.account_type)
         .await
     {
         #[cfg(debug_assertions)]

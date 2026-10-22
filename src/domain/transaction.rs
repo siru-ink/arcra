@@ -1,4 +1,4 @@
-use crate::domain;
+use crate::domain::{self};
 
 #[derive(Debug, thiserror::Error)]
 pub enum CreateNewTransactionError {
@@ -26,6 +26,8 @@ pub enum HydrateTransactionError {
     InvalidCreditAccount(domain::HydrateAccountError),
     #[error("Failed to hydrate contained debit account reference.")]
     InvalidDebitAccount(domain::HydrateAccountError),
+    #[error("Failed to hydrate contained category reference.")]
+    InvalidCategory(#[from] domain::CategoryHydrateError),
 }
 
 #[derive(Clone, Copy)]
@@ -38,6 +40,7 @@ pub struct NewTransaction {
     credit_amount: i64,
     debit_account: domain::Account,
     debit_amount: i64,
+    category: domain::Category,
 }
 
 #[derive(serde::Serialize)]
@@ -49,6 +52,7 @@ pub struct Transaction {
     credit_amount: i64,
     debit_account: domain::Account,
     debit_amount: i64,
+    category: domain::Category,
 }
 
 impl From<TransactionID> for i64 {
@@ -76,6 +80,10 @@ impl TryFrom<i64> for TransactionID {
 }
 
 impl NewTransaction {
+    pub fn category(&self) -> &domain::Category {
+        &self.category
+    }
+
     pub fn credit_account(&self) -> &domain::Account {
         &self.credit_account
     }
@@ -102,6 +110,7 @@ impl NewTransaction {
         credit_amount: i64,
         debit_account: domain::Account,
         debit_amount: i64,
+        category: domain::Category,
     ) -> Result<Self, CreateNewTransactionError> {
         if description.is_empty() {
             return Err(CreateNewTransactionError::InvalidDescription);
@@ -118,6 +127,7 @@ impl NewTransaction {
             credit_amount,
             debit_account,
             debit_amount,
+            category,
         })
     }
 
@@ -127,6 +137,10 @@ impl NewTransaction {
 }
 
 impl Transaction {
+    pub fn category(&self) -> &domain::Category {
+        &self.category
+    }
+
     pub fn credit_account(&self) -> &domain::Account {
         &self.credit_account
     }
@@ -159,9 +173,6 @@ impl Transaction {
         credit_account_currency_symbol: String,
         credit_account_balance: i64,
         credit_account_account_type: i64,
-        credit_account_category_id: i64,
-        credit_account_category_name: String,
-        credit_account_category_description: String,
         credit_amount: i64,
         debit_account_id: i64,
         debit_account_name: String,
@@ -171,10 +182,10 @@ impl Transaction {
         debit_account_currency_symbol: String,
         debit_account_balance: i64,
         debit_account_account_type: i64,
-        debit_account_category_id: i64,
-        debit_account_category_name: String,
-        debit_account_category_description: String,
         debit_amount: i64,
+        category_id: i64,
+        category_name: String,
+        category_description: String,
     ) -> Result<Self, HydrateTransactionError> {
         if id <= 0 {
             return Err(HydrateTransactionError::InvalidID);
@@ -191,9 +202,6 @@ impl Transaction {
             credit_account_currency_symbol,
             credit_account_balance,
             credit_account_account_type,
-            credit_account_category_id,
-            credit_account_category_name,
-            credit_account_category_description,
         )
         .map_err(|e| HydrateTransactionError::InvalidCreditAccount(e))?;
 
@@ -206,11 +214,11 @@ impl Transaction {
             debit_account_currency_symbol,
             debit_account_balance,
             debit_account_account_type,
-            debit_account_category_id,
-            debit_account_category_name,
-            debit_account_category_description,
         )
         .map_err(|e| HydrateTransactionError::InvalidDebitAccount(e))?;
+
+        let category =
+            domain::Category::try_hydrate(category_id, category_name, category_description)?;
 
         Ok(Self {
             id,
@@ -220,6 +228,7 @@ impl Transaction {
             credit_amount,
             debit_account,
             debit_amount,
+            category,
         })
     }
 

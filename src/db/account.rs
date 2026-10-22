@@ -41,9 +41,6 @@ impl TryFrom<AccountRow> for domain::Account {
             value.currency_symbol,
             value.balance,
             value.account_type,
-            value.category_id,
-            value.category_name,
-            value.category_description,
         )
     }
 }
@@ -57,9 +54,6 @@ struct AccountRow {
     currency_symbol: String,
     balance: i64,
     account_type: i64,
-    category_id: i64,
-    category_name: String,
-    category_description: String,
 }
 
 impl Db {
@@ -68,13 +62,12 @@ impl Db {
         account: domain::NewAccount,
     ) -> Result<domain::Account, CreateAccountError> {
         let new_id = sqlx::query!(
-            r#"INSERT INTO accounts (name, currency, balance, account_type, category)
-               VALUES (?, ?, 0, ?, ?)
-               RETURNING id"#,
+            "INSERT INTO accounts (name, currency, balance, account_type)
+             VALUES (?, ?, 0, ?)
+             RETURNING id",
             account.name(),
             account.currency().id(),
             account.account_type() as i64,
-            account.category().id()
         )
         .fetch_one(&mut *conn)
         .await?
@@ -82,7 +75,7 @@ impl Db {
 
         let new_account = sqlx::query_as!(
             AccountRow,
-            r#"SELECT
+            "SELECT
                  a.id as id,
                  a.name as name,
                  cu.id as currency_id,
@@ -90,14 +83,10 @@ impl Db {
                  cu.descriptor as currency_descriptor,
                  cu.symbol as currency_symbol,
                  a.balance as balance,
-                 a.account_type as account_type,
-                 ca.id as category_id,
-                 ca.name as category_name,
-                 ca.description as category_description
-               FROM accounts a
-               JOIN currencies cu on a.currency = cu.id
-               JOIN categories ca on a.category = ca.id
-               WHERE a.id = ?"#,
+                 a.account_type as account_type
+             FROM accounts a
+             JOIN currencies cu on a.currency = cu.id
+             WHERE a.id = ?",
             new_id
         )
         .fetch_one(conn)
@@ -120,13 +109,9 @@ impl Db {
                  cu.descriptor as currency_descriptor,
                  cu.symbol as currency_symbol,
                  a.balance as balance,
-                 a.account_type as account_type,
-                 ca.id as category_id,
-                 ca.name as category_name,
-                 ca.description as category_description
+                 a.account_type as account_type
              FROM accounts a
              JOIN currencies cu on a.currency = cu.id
-             JOIN categories ca on a.category = ca.id
              WHERE a.id = ?",
             i64::from(id)
         )
@@ -180,13 +165,9 @@ impl Db {
                  cu.descriptor as currency_descriptor,
                  cu.symbol as currency_symbol,
                  a.balance as balance,
-                 a.account_type as account_type,
-                 ca.id as category_id,
-                 ca.name as category_name,
-                 ca.description as category_description
+                 a.account_type as account_type
              FROM accounts a
              JOIN currencies cu on a.currency = cu.id
-             JOIN categories ca on a.category = ca.id
              WHERE a.account_type != ?",
             domain::AccountType::CurrencyExchange.id(),
         )
@@ -214,13 +195,9 @@ impl Db {
                  cu.descriptor as currency_descriptor,
                  cu.symbol as currency_symbol,
                  a.balance as balance,
-                 a.account_type as account_type,
-                 ca.id as category_id,
-                 ca.name as category_name,
-                 ca.description as category_description
+                 a.account_type as account_type
              FROM accounts a
              JOIN currencies cu on a.currency = cu.id
-             JOIN categories ca on a.category = ca.id
              WHERE a.account_type = ?",
             domain::AccountType::CurrencyExchange.id(),
         )

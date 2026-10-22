@@ -19,8 +19,7 @@ CREATE TABLE accounts (
     name TEXT UNIQUE NOT NULL,
     currency INTEGER NOT NULL REFERENCES currencies(id) ON DELETE RESTRICT,
     balance INTEGER NOT NULL,
-    account_type INTEGER NOT NULL,
-    category INTEGER NOT NULL REFERENCES categories(id) ON DELETE RESTRICT
+    account_type INTEGER NOT NULL
 );
 
 CREATE TABLE transactions (
@@ -30,7 +29,8 @@ CREATE TABLE transactions (
     credit_account INTEGER NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
     credit_amount INTEGER NOT NULL,
     debit_account INTEGER NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
-    debit_amount INTEGER NOT NULL
+    debit_amount INTEGER NOT NULL,
+    category INTEGER NOT NULL REFERENCES categories(id) ON DELETE RESTRICT
 );
 
 CREATE TABLE sessions (

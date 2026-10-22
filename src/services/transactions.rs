@@ -32,6 +32,12 @@ pub enum CreateNewTransactionError {
         "Failed to load a currency exchange account for multi-currency transaction processing."
     )]
     ExchangeAccountNotFound(#[from] crate::services::ReadAccountError),
+    #[error("Failed to read category from database.")]
+    DBReadCategoryFailed(#[from] db::ReadCategoryError),
+    #[error("No category id was provided, but a category id was needed for this transaction.")]
+    CategoryIDNotProvided,
+    #[error("Could not convert provided data into a CategoryID domain object.")]
+    CreateCategoryIDFailed(#[from] domain::CategoryIDConstructorError),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -125,6 +131,7 @@ impl crate::services::Butler {
         debit_account_id: i64,
         credit_amount: f64,
         debit_amount: Option<f64>,
+        category_id: Option<i64>,
     ) -> Result<domain::Transaction, CreateNewTransactionError> {
         if credit_account_id == debit_account_id {
             return Err(CreateNewTransactionError::AccountsMustDiffer);
@@ -162,6 +169,18 @@ impl crate::services::Butler {
             return Err(CreateNewTransactionError::DBUpdateDebitAccountFailed(e));
         };
 
+        let null_category = db::Db::read_null_category(&mut conn).await?;
+        let category = match (debit_account.account_type(), category_id) {
+            (domain::AccountType::Expense, None) => {
+                return Err(CreateNewTransactionError::CategoryIDNotProvided);
+            }
+            (domain::AccountType::Expense, Some(raw_category_id)) => {
+                let category_id = domain::CategoryID::try_from(raw_category_id)?;
+                db::Db::read_category(&mut conn, category_id).await?
+            }
+            _ => null_category.clone(),
+        };
+
         let transaction: domain::Transaction;
         if credit_account.currency() != debit_account.currency() {
             let credit_exchange_account = self
@@ -173,6 +192,7 @@ impl crate::services::Butler {
                 actual_credit_amount,
                 credit_exchange_account,
                 actual_credit_amount,
+                null_category,
             )?;
 
             let _credit_transaction =
@@ -187,6 +207,7 @@ impl crate::services::Butler {
                 actual_debit_amount,
                 debit_exchange_account,
                 actual_debit_amount,
+                category,
             )?;
 
             let debit_transaction =
@@ -200,6 +221,7 @@ impl crate::services::Butler {
                 actual_credit_amount,
                 debit_account,
                 actual_debit_amount,
+                category,
             )?;
 
             transaction = db::Db::create_transaction(&mut conn, new_transaction).await?;
