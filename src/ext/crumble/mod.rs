@@ -42,7 +42,7 @@ impl CrumbleKind {
             .http_only(true)
             .max_age(Duration::days(7))
             .secure(true)
-            .same_site(SameSite::Strict)
+            .same_site(SameSite::Lax)
             .build()
     }
 }
