@@ -1,5 +1,4 @@
 use crate::{
-    domain,
     ext::{Flash, Session},
     services::Butler,
     template::Publisher,
@@ -30,25 +29,9 @@ pub async fn get_expense_by_category(
     publisher: Publisher,
     _session: Session,
 ) -> Response {
-    let Ok(transactions) = butler.list_all_transactions().await else {
-        flash.set("Could not load all transactions".to_string());
+    let Ok(totals) = butler.expense_category_totals().await else {
+        flash.set("Failed to analize expenses.".to_string());
         return Redirect::to("/").into_response();
     };
-
-    let mut totals: std::collections::HashMap<String, std::collections::HashMap<String, i64>> =
-        std::collections::HashMap::new();
-
-    for transaction in transactions {
-        let debit_account = transaction.debit_account();
-        if debit_account.account_type() != domain::AccountType::Expense {
-            continue;
-        }
-        *totals
-            .entry(transaction.category().name().to_string())
-            .or_default()
-            .entry(debit_account.currency().symbol().to_string())
-            .or_default() += transaction.debit_amount();
-    }
-
     publisher.analytics_expense_by_category(totals)
 }
