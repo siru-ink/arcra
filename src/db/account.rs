@@ -168,7 +168,8 @@ impl Db {
                  a.account_type as account_type
              FROM accounts a
              JOIN currencies cu on a.currency = cu.id
-             WHERE a.account_type != ?",
+             WHERE a.account_type != ?
+             ORDER BY a.name",
             domain::AccountType::CurrencyExchange.id(),
         )
         .fetch_all(conn)
