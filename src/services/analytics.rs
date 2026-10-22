@@ -1,6 +1,5 @@
-use chrono::Datelike;
-
 use crate::{db, domain};
+use chrono::{DateTime, Datelike, TimeZone, Utc};
 
 #[derive(Debug, thiserror::Error)]
 pub enum ServiceAnalyticsCheckAccountEquationError {
@@ -66,32 +65,28 @@ impl crate::services::Butler {
     > {
         let mut transactions = self.list_all_transactions().await?;
 
-        if &min_filter == "last-month" {
-            let current_time = chrono::Utc::now();
-            let beginning_of_month =
-                chrono::NaiveDate::from_ymd_opt(current_time.year(), current_time.month(), 1)
-                    .expect("Current year and month with day 1 is always valid.")
-                    .and_hms_opt(0, 0, 0)
-                    .expect("0h0m0s is always valid")
-                    .and_utc();
-
-            transactions = transactions
-                .into_iter()
-                .filter(|tx| tx.time() >= beginning_of_month)
-                .collect();
-        } else if &min_filter == "last-year" {
-            let current_time = chrono::Utc::now();
-            let beginning_of_month = chrono::NaiveDate::from_ymd_opt(current_time.year(), 1, 1)
-                .expect("Current year with month and day 1 is always valid.")
-                .and_hms_opt(0, 0, 0)
-                .expect("0h0m0s is always valid")
-                .and_utc();
-
-            transactions = transactions
-                .into_iter()
-                .filter(|tx| tx.time() >= beginning_of_month)
-                .collect();
+        fn start_of_month(dt: DateTime<Utc>) -> DateTime<Utc> {
+            Utc.with_ymd_and_hms(dt.year(), dt.month(), 1, 0, 0, 0)
+                .single()
+                .expect("1st of any month at 00:00 is always valid")
         }
+
+        fn start_of_year(dt: DateTime<Utc>) -> DateTime<Utc> {
+            Utc.with_ymd_and_hms(dt.year(), 1, 1, 0, 0, 0)
+                .single()
+                .expect("Jan 1st at 00:00 is always valid")
+        }
+
+        fn time_cutoff(filter: &str) -> Option<DateTime<Utc>> {
+            let now = Utc::now();
+            match filter {
+                "last-month" => Some(start_of_month(now)),
+                "last-year" => Some(start_of_year(now)),
+                _ => None,
+            }
+        }
+        let cutoff = time_cutoff(&min_filter);
+        transactions.retain(|tx| cutoff.is_none_or(|c| tx.time() >= c));
 
         let mut conn = self.dbase.acquire().await?;
         let null_category = db::Db::read_null_category(&mut conn).await?;
