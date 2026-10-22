@@ -1,3 +1,5 @@
+use chrono::Datelike;
+
 use crate::{db, domain};
 
 #[derive(Debug, thiserror::Error)]
@@ -57,11 +59,40 @@ impl crate::services::Butler {
 
     pub async fn expense_category_totals(
         &self,
+        min_filter: String,
     ) -> Result<
         std::collections::BTreeMap<String, std::collections::BTreeMap<String, i64>>,
         ServiceAnalyticsExpenseCategoryTotalsError,
     > {
-        let transactions = self.list_all_transactions().await?;
+        let mut transactions = self.list_all_transactions().await?;
+
+        if &min_filter == "last-month" {
+            let current_time = chrono::Utc::now();
+            let beginning_of_month =
+                chrono::NaiveDate::from_ymd_opt(current_time.year(), current_time.month(), 1)
+                    .expect("Current year and month with day 1 is always valid.")
+                    .and_hms_opt(0, 0, 0)
+                    .expect("0h0m0s is always valid")
+                    .and_utc();
+
+            transactions = transactions
+                .into_iter()
+                .filter(|tx| tx.time() >= beginning_of_month)
+                .collect();
+        } else if &min_filter == "last-year" {
+            let current_time = chrono::Utc::now();
+            let beginning_of_month = chrono::NaiveDate::from_ymd_opt(current_time.year(), 1, 1)
+                .expect("Current year with month and day 1 is always valid.")
+                .and_hms_opt(0, 0, 0)
+                .expect("0h0m0s is always valid")
+                .and_utc();
+
+            transactions = transactions
+                .into_iter()
+                .filter(|tx| tx.time() >= beginning_of_month)
+                .collect();
+        }
+
         let mut conn = self.dbase.acquire().await?;
         let null_category = db::Db::read_null_category(&mut conn).await?;
         let mut totals: std::collections::BTreeMap<

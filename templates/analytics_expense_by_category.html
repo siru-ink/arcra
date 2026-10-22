@@ -3,6 +3,11 @@
 {% block title %}Analytics | {% endblock title %}
 
 {% block content %}
+<div>
+    <a href="/analytics/expense_by_category?time_filter=last-month">Last month</a> |
+    <a href="/analytics/expense_by_category?time_filter=last-year">Last year</a> |
+    <a href="/analytics/expense_by_category?time_filter=all-time">All time</a>
+</div>
 <h2>Analytics: Expenses by Categories</h2>
 <ul>
     {% for category,currencies in totals %}

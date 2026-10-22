@@ -23,13 +23,23 @@ pub async fn get_check_accounting_equation(
     }
 }
 
+#[derive(serde::Deserialize)]
+pub struct ExpenseCategoryFilters {
+    time_filter: Option<String>,
+}
+
 pub async fn get_expense_by_category(
     butler: Butler,
     flash: Flash,
     publisher: Publisher,
+    axum::extract::Query(param): axum::extract::Query<ExpenseCategoryFilters>,
     _session: Session,
 ) -> Response {
-    let Ok(totals) = butler.expense_category_totals().await else {
+    let time_filter_string = match param.time_filter {
+        Some(text) => text,
+        None => "".to_string(),
+    };
+    let Ok(totals) = butler.expense_category_totals(time_filter_string).await else {
         flash.set("Failed to analize expenses.".to_string());
         return Redirect::to("/").into_response();
     };
